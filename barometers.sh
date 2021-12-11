@@ -29,21 +29,34 @@ CACHEDIR="$SCRIPTDIR"/cache
 # clean CSV - remove lines that contain ,,
 # loop through CSV, comparing third column to the prior line, third column, if the same, don't print it
 ### THIS
-import(){
-    for file in "$SCRIPTDIR"/raw/*.txt; do
-        Skippy="0"
-        if [ -f "$1" ];then
-            LocNumber=$(basename "$file" | awk -F "_" '{print $1}')
-            sed 's/@/,/g' "$1" | grep -v ",," > $CACHEDIR/temp.txt
 
+## AFTER INITIAL IMPORT, ONLY TAKE LAST 100 LINES OR SO? 
+
+import(){
+
+     for file in $(find "$SCRIPTDIR"/raw -iname "*.txt"); do
+        Skippy="0"
+        echo "!$file!"
+        if [[ -f "$file" ]];then
+            LocNumber=$(basename "$file" | awk -F "_" '{print $1}')
+            echo "Parsing location $LocNumber from file $file"
+            LocTemp="$CACHEDIR/$LocNumber"_temp.txt
+            LocOut="$CACHEDIR/$LocNumber"_out.txt
+            if [ ! -f "$LocTemp" ];then
+                touch "$LocTemp"
+            fi
+            sed 's/@/,/g' "$file" | grep -v ",," > "$LocTemp"
+            if [ ! -f "$LocOut" ];then
+                touch "$LocOut"
+            fi
             while IFS= read -r line; do
                 currval=$(echo "$line"| awk -F ',' '{print $3}')
                 if [ "$currval" != "$priorval" ];then
                     priorval="$currval"
                     CurrentLineEpoch=$(echo "$line" | awk -F ',' '{print $1}')
-                    DoesExist=(grep -c "$CurrentLineEpoch" "$CACHEDIR/$LocNumber_out.txt")
+                    DoesExist=$(grep -c "$CurrentLineEpoch" "$LocOut")
                     if [ "$DoesExist" == "0" ];then
-                        echo "$line" >> "$CACHEDIR/$LocNumber_out.txt"
+                        echo "$line" >> "$LocOut"
                     else
                         echo "Already have this line."
                     fi
@@ -51,37 +64,45 @@ import(){
                     ((Skippy++))
                     echo "Skipping duplicate $Skippy"
                 fi
-            done < $CACHEDIR/temp.txt
+            done < "$LocTemp"
         fi
     done
 }
 
 do_math(){
-    for file in "$CACHEDIR"/*_out.txt; do
-        NumberOfLines=$(wc -l < "$file")
-        LineCounter=1
-        LocNumber=$(basename "$file" | awk -F "_" '{print $1}')
+    for file in $(find "$CACHEDIR" -iname "*_out.txt"); do
+        InMathFile="$file"
+        NumberOfLines=$(wc -l < "$InMathFile")
+        # THIS MUST START AT > 51 (or greater than number of values you're looking back)
+        # UNLESS YOU'RE USING A TRUNCATED DATA SET
+        LineCounter=52
+        LocNumber=$(basename "$InMathFile" | awk -F "_" '{print $1}')
+        LocProcessed="$CACHEDIR"/"$LocNumber"_processed.txt
+        if [ ! -f "$LocProcessed" ];then
+            touch "$LocProcessed"
+        fi
         while [ $LineCounter -lt $NumberOfLines ];do 
             # get the line
-            CurrentLine=$(sed -n "$LineCounter{p;q}" "$file")
+
+            CurrentLine=$(sed -n "$LineCounter{p;q}" "$InMathFile")
             CurrentLineValue=$(echo "$CurrentLine" | awk -F ',' '{print $6}')
             CurrentLineEpoch=$(echo "$CurrentLine" | awk -F ',' '{print $1}')
             MathCounter=1
-            DoesExist=(grep -c "$CurrentLineEpoch" "$CACHEDIR"/"$LocNumber"_processed.txt)
+            DoesExist=$(grep -c "$CurrentLineEpoch" "$LocProcessed" )
             if [ "$DoesExist" == "0" ];then
                 while [ $MathCounter -lt 51 ];do 
                     ((ReadLineNumber=$LineCounter-$MathCounter))
                     #echo "$ReadLineNumber"
-                    BackLine=$(sed -n "$ReadLineNumber{p;q}" "$file")
+                    BackLine=$(sed -n "$ReadLineNumber{p;q}" "$InMathFile")
                     BackLineValue=$(echo "$BackLine" | awk -F ',' '{print $6}')
-                    ((DiffLineValue=$CurrentLineValue - $BackLineValue))
+                    ((DiffLineValue=$CurrentLineValue-$BackLineValue))
                     CurrentLine="$CurrentLine,$DiffLineValue"
                     ((MathCounter++))
                 done 
-                echo "$CurrentLine" >> "$CACHEDIR"/"$LocNumber"_processed.txt
+                echo "$CurrentLine" >> "$LocProcessed"
                 echo "$LineCounter of $NumberOfLines processed"
             else
-                "Exists"
+                echo "Line $LineCounter Exists"
             fi
             ((LineCounter++))
         done 
@@ -90,11 +111,26 @@ do_math(){
 
 
 show_load(){
-    while IFS= read -r line; do
 
-        runline=$(echo -e "$line" | awk -F 'hPa,' '{print $2}' | sed "s/^/,/g" | sed "s/\-//g" | sed "s/,/@/g" )
+    if [ ! -f "$CACHEDIR"/display.tmp ];then
+        touch "$CACHEDIR"/display.tmp
+    fi
+    
+    for file in $(find "$CACHEDIR" -iname "*_processed.txt"); do
+        if [ -f "$file" ];then 
+            echo "!$file!"
+            tail -n 256 "$file" > "$CACHEDIR"/display.tmp
+            
+            while IFS= read -r line; do
 
-        echo -e "$runline" | sed "s/@2[0-9]/$WHITE█/g" | sed "s/@20/$WHITE█/g" | sed "s/@19/$YELLOW█/g" | sed "s/@18/$YELLOW█/g" |  sed "s/@17/$YELLOW█/g"  | sed "s/@16/$YELLOW█/g"  | sed "s/@15/$YELLOW█/g" | sed "s/@14/$YELLOW█/g" | sed "s/@13/$YELLOW▒/g" | sed "s/@12/$YELLOW░/g" | sed "s/@11/$RED█/g" | sed "s/@10/$RED▒/g" |  sed "s/@0/$CYAN░/g" |  sed "s/@1/$CYAN▒/g" | sed "s/@2/$CYAN█/g" |  sed "s/@3/$BLUE░/g" | sed "s/@4/$BLUE▒/g" |  sed "s/@5/$BLUE█/g" | sed "s/@6/$PURPLE░/g" | sed "s/@7/$PURPLE▒/g" | sed "s/@8/$PURPLE█/g" |  sed "s/@9/$RED░/g" 
+                runline=$(echo -e "$line" | awk -F 'hPa,' '{print $2}' | sed "s/^/,/g" | sed "s/\-//g" | sed "s/,/@/g" )
 
-    done < $CACHEDIR/out2.txt
+                echo -e "$runline" | sed "s/@2[0-9]/$WHITE█/g" | sed "s/@20/$WHITE█/g" | sed "s/@19/$YELLOW█/g" | sed "s/@18/$WHITE▒/g" |  sed "s/@17/$WHITE▒/g"  | sed "s/@16/$WHITE░/g"  | sed "s/@15/$WHITE░/g" | sed "s/@14/$YELLOW█/g" | sed "s/@13/$YELLOW▒/g" | sed "s/@12/$YELLOW░/g" | sed "s/@11/$RED█/g" | sed "s/@10/$RED▒/g" |  sed "s/@0/$CYAN░/g" |  sed "s/@1/$CYAN▒/g" | sed "s/@2/$CYAN█/g" |  sed "s/@3/$BLUE░/g" | sed "s/@4/$BLUE▒/g" |  sed "s/@5/$BLUE█/g" | sed "s/@6/$PURPLE░/g" | sed "s/@7/$PURPLE▒/g" | sed "s/@8/$PURPLE█/g" |  sed "s/@9/$RED░/g" 
+            done < $CACHEDIR/display.tmp
+        fi
+    done
 }
+
+#import
+#do_math
+show_load
