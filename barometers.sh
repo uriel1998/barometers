@@ -57,44 +57,35 @@ import(){
 }
 
 do_math(){
-
-    NumberOfLines=$(wc -l < "$SCRIPTDIR/out.txt")
-    LineCounter=500000
-    if [ -f "$CACHEDIR"/processed.txt ];then
-        echo "exists for texting"
-    else
+    for file in "$CACHEDIR"/*_out.txt; do
+        NumberOfLines=$(wc -l < "$file")
+        LineCounter=1
+        LocNumber=$(basename "$file" | awk -F "_" '{print $1}')
         while [ $LineCounter -lt $NumberOfLines ];do 
             # get the line
-            CurrentLine=$(sed -n "$LineCounter{p;q}" "$SCRIPTDIR/out.txt")
+            CurrentLine=$(sed -n "$LineCounter{p;q}" "$file")
             CurrentLineValue=$(echo "$CurrentLine" | awk -F ',' '{print $6}')
             CurrentLineEpoch=$(echo "$CurrentLine" | awk -F ',' '{print $1}')
             MathCounter=1
-            DoesExist=(grep -c "$CurrentLineEpoch" "$CACHEDIR"/processed.txt)
+            DoesExist=(grep -c "$CurrentLineEpoch" "$CACHEDIR"/"$LocNumber"_processed.txt)
             if [ "$DoesExist" == "0" ];then
-            #echo "$CurrentLine"
-            #echo "$CurrentLineValue"
-            #read
                 while [ $MathCounter -lt 51 ];do 
                     ((ReadLineNumber=$LineCounter-$MathCounter))
                     #echo "$ReadLineNumber"
-                    BackLine=$(sed -n "$ReadLineNumber{p;q}" "$SCRIPTDIR/out.txt")
+                    BackLine=$(sed -n "$ReadLineNumber{p;q}" "$file")
                     BackLineValue=$(echo "$BackLine" | awk -F ',' '{print $6}')
                     ((DiffLineValue=$CurrentLineValue - $BackLineValue))
-                    #echo "$BackLine"
-                    #echo "$BackLineValue"
-                    #echo "$DiffLineValue"
-                    #read
                     CurrentLine="$CurrentLine,$DiffLineValue"
                     ((MathCounter++))
                 done 
-                echo "$CurrentLine" >> "$CACHEDIR"/processed.txt
+                echo "$CurrentLine" >> "$CACHEDIR"/"$LocNumber"_processed.txt
                 echo "$LineCounter of $NumberOfLines processed"
             else
                 "Exists"
             fi
             ((LineCounter++))
         done 
-    fi
+    done
 }
 
 
