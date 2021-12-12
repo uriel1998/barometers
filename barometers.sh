@@ -1,6 +1,6 @@
 #! /bin/bash
 
-
+# Dayton is : 4509884
 #Derived from https://gist.githubusercontent.com/elucify/c7ccfee9f13b42f11f81/raw/9f27e072aadc4df6f84d515309c82585a8a13d8e/gistfile1.txt
 
 RESTORE=$(echo -en '\033[0m')
@@ -122,15 +122,18 @@ show_load(){
             tail -n 256 "$file" > "$CACHEDIR"/display.tmp
             
             while IFS= read -r line; do
-
+                datetime=$(echo -e "$line" | awk -F ',' '{print $2" "$3}')
                 runline=$(echo -e "$line" | awk -F 'hPa,' '{print $2}' | sed "s/^/,/g" | sed "s/\-//g" | sed "s/,/@/g" )
 
-                echo -e "$runline" | sed "s/@2[0-9]/$WHITE█/g" | sed "s/@20/$WHITE█/g" | sed "s/@19/$YELLOW█/g" | sed "s/@18/$WHITE▒/g" |  sed "s/@17/$WHITE▒/g"  | sed "s/@16/$WHITE░/g"  | sed "s/@15/$WHITE░/g" | sed "s/@14/$YELLOW█/g" | sed "s/@13/$YELLOW▒/g" | sed "s/@12/$YELLOW░/g" | sed "s/@11/$RED█/g" | sed "s/@10/$RED▒/g" |  sed "s/@0/$CYAN░/g" |  sed "s/@1/$CYAN▒/g" | sed "s/@2/$CYAN█/g" |  sed "s/@3/$BLUE░/g" | sed "s/@4/$BLUE▒/g" |  sed "s/@5/$BLUE█/g" | sed "s/@6/$PURPLE░/g" | sed "s/@7/$PURPLE▒/g" | sed "s/@8/$PURPLE█/g" |  sed "s/@9/$RED░/g" 
+                colorline=$(echo -e "$runline" | sed "s/@2[0-9]/$WHITE█/g" | sed "s/@20/$WHITE█/g" | sed "s/@19/$YELLOW█/g" | sed "s/@18/$WHITE▒/g" |  sed "s/@17/$WHITE▒/g"  | sed "s/@16/$WHITE░/g"  | sed "s/@15/$WHITE░/g" | sed "s/@14/$YELLOW█/g" | sed "s/@13/$YELLOW▒/g" | sed "s/@12/$YELLOW░/g" | sed "s/@11/$RED█/g" | sed "s/@10/$RED▒/g" |  sed "s/@0/$CYAN░/g" |  sed "s/@1/$CYAN▒/g" | sed "s/@2/$CYAN█/g" |  sed "s/@3/$BLUE░/g" | sed "s/@4/$BLUE▒/g" |  sed "s/@5/$BLUE█/g" | sed "s/@6/$PURPLE░/g" | sed "s/@7/$PURPLE▒/g" | sed "s/@8/$PURPLE█/g" |  sed "s/@9/$RED░/g" )
+                echo -e "$datetime  $colorline"
             done < $CACHEDIR/display.tmp
         fi
     done
 }
 
-#import
-#do_math
+
+tail -n 576 /home/steven/tmp/4509884.txt > "$SCRIPTDIR"/raw/4509884_barometer_readings.txt
+import
+do_math
 show_load
