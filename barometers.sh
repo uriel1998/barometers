@@ -120,6 +120,7 @@ show_load(){
         if [ -f "$file" ];then 
             echo "!$file!"
             tail -n 256 "$file" > "$CACHEDIR"/display.tmp
+            #cat "$file" > "$CACHEDIR"/display.tmp
             
             while IFS= read -r line; do
                 datetime=$(echo -e "$line" | awk -F ',' '{print $2" "$3}')
@@ -132,8 +133,33 @@ show_load(){
     done
 }
 
+show_numbers_load(){
 
-tail -n 576 /home/steven/tmp/4509884.txt > "$SCRIPTDIR"/raw/4509884_barometer_readings.txt
-import
-do_math
-show_load
+    if [ ! -f "$CACHEDIR"/display.tmp ];then
+        touch "$CACHEDIR"/display.tmp
+    fi
+    
+    for file in $(find "$CACHEDIR" -iname "*_processed.txt"); do
+        if [ -f "$file" ];then 
+            echo "!$file!"
+            tail -n 256 "$file" > "$CACHEDIR"/display.tmp
+            #cat "$file" > "$CACHEDIR"/display.tmp
+            
+            while IFS= read -r line; do
+                datetime=$(echo -e "$line" | awk -F ',' '{print $2" "$3}')
+                runline=$(echo -e "$line" | awk -F 'hPa,' '{print $2}' | sed "s/^/,/g" | sed "s/\-//g" | sed "s/,/@/g" )
+                runline=$(echo -e "$runline" | awk -F '@' '{print "@"$2 "@"$7 "@"$13 "@"$18 "@"$25 "@"$37 "@"$50}')
+                colorline=$(echo -e "$runline" | sed "s/@2[0-9]/$WHITE█/g" | sed "s/@20/$WHITE█/g" | sed "s/@19/$YELLOW█/g" | sed "s/@18/$WHITE▒/g" |  sed "s/@17/$WHITE▒/g"  | sed "s/@16/$WHITE░/g"  | sed "s/@15/$WHITE░/g" | sed "s/@14/$YELLOW█/g" | sed "s/@13/$YELLOW▒/g" | sed "s/@12/$YELLOW░/g" | sed "s/@11/$RED█/g" | sed "s/@10/$RED▒/g" |  sed "s/@0/$CYAN░/g" |  sed "s/@1/$CYAN▒/g" | sed "s/@2/$CYAN█/g" |  sed "s/@3/$BLUE░/g" | sed "s/@4/$BLUE▒/g" |  sed "s/@5/$BLUE█/g" | sed "s/@6/$PURPLE░/g" | sed "s/@7/$PURPLE▒/g" | sed "s/@8/$PURPLE█/g" |  sed "s/@9/$RED░/g" )
+                echo -e "$datetime  $colorline"
+            done < $CACHEDIR/display.tmp
+        fi
+    done
+}
+
+
+#tail -n 576 /home/steven/tmp/4509884.txt > "$SCRIPTDIR"/raw/4509884_barometer_readings.txt
+#import
+#do_math
+#show_load
+# this is prototyping a load type display
+show_numbers_load
