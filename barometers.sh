@@ -1,5 +1,7 @@
 #! /bin/bash
 
+QUIET=""
+
 # Dayton is : 4509884
 #Derived from https://gist.githubusercontent.com/elucify/c7ccfee9f13b42f11f81/raw/9f27e072aadc4df6f84d515309c82585a8a13d8e/gistfile1.txt
 
@@ -58,11 +60,15 @@ import(){
                     if [ "$DoesExist" == "0" ];then
                         echo "$line" >> "$LocOut"
                     else
-                        echo "Already have this line."
+                        if [ -z "$QUIET" ];then
+                            echo "Already have this line."
+                        fi
                     fi
                 else
                     ((Skippy++))
-                    echo "Skipping duplicate $Skippy"
+                    if [ -z "$QUIET" ];then
+                        echo "Skipping duplicate $Skippy"
+                    fi
                 fi
             done < "$LocTemp"
         fi
@@ -100,9 +106,13 @@ do_math(){
                     ((MathCounter++))
                 done 
                 echo "$CurrentLine" >> "$LocProcessed"
-                echo "$LineCounter of $NumberOfLines processed"
+                if [ -z "$QUIET" ];then
+                    echo "$LineCounter of $NumberOfLines processed"
+                fi
             else
-                echo "Line $LineCounter Exists"
+                if [ -z "$QUIET" ];then
+                    echo "Line $LineCounter Exists"
+                fi
             fi
             ((LineCounter++))
         done 
@@ -118,7 +128,8 @@ show_load(){
     
     for file in $(find "$CACHEDIR" -iname "*_processed.txt"); do
         if [ -f "$file" ];then 
-            echo "!$file!"
+            # echo "!$file!"
+            echo -e "\n\n"
             tail -n 256 "$file" > "$CACHEDIR"/display.tmp
             #cat "$file" > "$CACHEDIR"/display.tmp
             
@@ -141,7 +152,7 @@ show_numbers_load(){
     
     for file in $(find "$CACHEDIR" -iname "*_processed.txt"); do
         if [ -f "$file" ];then 
-            echo "!$file!"
+            echo -e "\n\n"
             tail -n 256 "$file" > "$CACHEDIR"/display.tmp
             #cat "$file" > "$CACHEDIR"/display.tmp
             
@@ -156,10 +167,13 @@ show_numbers_load(){
     done
 }
 
+# put a check for quiet eventually
 
-#tail -n 576 /home/steven/tmp/4509884.txt > "$SCRIPTDIR"/raw/4509884_barometer_readings.txt
-#import
-#do_math
-#show_load
-# this is prototyping a load type display
+QUIET="1"
+tail -n 256 /home/steven/tmp/4509884.txt > "$SCRIPTDIR"/raw/4509884_barometer_readings.txt
+import
+do_math
+show_load
+echo -e "\n\n"
+# this is prototyping a load type display with fewer values
 show_numbers_load
