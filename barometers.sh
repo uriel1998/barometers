@@ -130,7 +130,7 @@ show_load(){
         if [ -f "$file" ];then 
             # echo "!$file!"
             echo -e "\n\n"
-            tail -n 256 "$file" > "$CACHEDIR"/display.tmp
+            tail -n 50 "$file" > "$CACHEDIR"/display.tmp
             #cat "$file" > "$CACHEDIR"/display.tmp
             
             while IFS= read -r line; do
@@ -153,7 +153,7 @@ show_numbers_load(){
     for file in $(find "$CACHEDIR" -iname "*_processed.txt"); do
         if [ -f "$file" ];then 
             echo -e "\n\n"
-            tail -n 256 "$file" > "$CACHEDIR"/display.tmp
+            tail -n 50 "$file" > "$CACHEDIR"/display.tmp
             #cat "$file" > "$CACHEDIR"/display.tmp
             
             while IFS= read -r line; do
@@ -168,12 +168,14 @@ show_numbers_load(){
 }
 
 # put a check for quiet eventually
+# put in arg for # lines of output
+# put in a sort because sometimes some wrong lines get sucked in here...
 
 QUIET="1"
 tail -n 256 /home/steven/tmp/4509884.txt > "$SCRIPTDIR"/raw/4509884_barometer_readings.txt
 import
 do_math
 show_load
-echo -e "\n\n"
+#echo -e "\n\n"
 # this is prototyping a load type display with fewer values
 show_numbers_load
