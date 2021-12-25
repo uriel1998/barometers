@@ -178,4 +178,4 @@ do_math
 show_load
 #echo -e "\n\n"
 # this is prototyping a load type display with fewer values
-show_numbers_load
+# show_numbers_load

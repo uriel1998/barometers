@@ -1,19 +1,43 @@
 
 can use a generator object to produce the various values in python by comparing positionals without having to store them in arrays holy shit
-
-dict { epoch, date, time, pressure, ABS generated (not sure exactly how without looking), with sign generated } 
+# data structure
+# pressures = [ epoch, date, time, pressure, calc_abs[], calc_sign[] ] 
 
 # (optionally - look at cache file as well and read it into dict first?)
 # get locnumber from file name
 
-temperatures = []
-with open('lab_05.txt') as infile:
-    for row in infile:
-        
-        if not row.find(",,"(replace("@", ",")):
-            # okay, this is it - but this needs to be assigned to a dictionary.
-            int(split(',', row.strip()))
-            # if key time already exists in dict, skip it
+pressures = []
+
+# double check global and local vars - d
+
+def read_in_cache(cache_file):
+    """ Reading in the cache file into the pressures data structure """ 
+
+    with open(cache_file) as infile:
+        for row in infile:            
+            if not row.find(",,"(replace("@", ",")):
+                # okay, this is it - but this needs to be assigned to a dictionary (or list?).
+                # epochtime
+                y = row.split(',',7)
+                # change this to dictionary definitions here mate
+                epochtime = y[0]
+                date = y[1]
+                time = y[2]
+                imp_now = y[3]
+                metric_now = y[5]
+                # this should be converting it to a list, but probably isn't
+                # need a different split here for abs with sign calculations
+                calc_abs = int(y[7])
+                calc_sign = int(y[8])
+                
+                if not date in pressures and not time in pressures:   # may need to do a sub-key check? unsure if this will also trigger off different lines
+                    list_to_add = [epochtime,date,time,imp_now,metric_now]
+                    list_to_add.append(calc_abs)
+                    list_to_add.append(calc_sign)  # because I want it as a sub-list
+                    pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
+                    pressures.sort() # because key 0 is epochtime
+
+
         
 # read in line by line
     # remove if empty value
