@@ -38,6 +38,17 @@ def perform_calculations(row):
 
         pressures[row].append(tuple(signed_calc))  #This SHOULD work?
 
+def show_calculations(num_output)
+    """ Display the tuples for the requested number of intervals back """
+    global pressures
+
+    while count < num_output:
+        print "{0} {1} {2}".format(str(pressures[row - count][1]), str(pressures[row - count][2]), str(pressures[row - count][7]))
+        count += 1
+
+
+
 # for last (user input?) entries, output the generated values
 # graphics to output colored data (no idea yet)
 
+#need control loop too
