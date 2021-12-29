@@ -14,12 +14,13 @@ def read_in_file(in_file):
     """ Reading in the cache file into the pressures data structure """ 
     global pressures
     with open(in_file) as infile:
-        for row in infile:            
-            if not row.find(",,"(replace("@", ",")):
+        for row in infile:         
+            row.replace("@", ",")
+            if not row.find(",,"):
                 # epochtime
                 # Oh, yeah, we didn't want units did we.
                 list_to_add = row.split(',',7)
-                if ( not list_to_add[1] in pressures ) AND ( not list_to_add[2] in pressures): 
+                if not list_to_add[1] in pressures and not list_to_add[2] in pressures:
                     pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
                     pressures.sort() # because key 0 is epochtime
     in_file.close
@@ -38,17 +39,27 @@ def perform_calculations(row):
 
         pressures[row].append(tuple(signed_calc))  #This SHOULD work?
 
-def show_calculations(num_output)
+def loop_calculations():
+    """ Control loop for calculations """
+    global pressures
+    
+    while count < len(pressures):
+        perform_calculations(count)
+        count += 1
+
+def show_calculations(num_output):
     """ Display the tuples for the requested number of intervals back """
     global pressures
 
     while count < num_output:
-        print "{0} {1} {2}".format(str(pressures[row - count][1]), str(pressures[row - count][2]), str(pressures[row - count][7]))
+        print ("{0} {1} {2}".format(str(pressures[row - count][1]), str(pressures[row - count][2]), str(pressures[row - count][7])))
         count += 1
 
 
+read_in_file cachefile
+read_in_file infile
+loop_calculations
+show_calculations(52)
 
 # for last (user input?) entries, output the generated values
 # graphics to output colored data (no idea yet)
-
-#need control loop too
