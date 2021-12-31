@@ -79,10 +79,12 @@ def loop_calculations():
 def show_calculations(num_output):
     """ Display the tuples for the requested number of intervals back """
     global pressures
+    
     last = len(pressures)
+    print("{0}".format(last))
     count = last - num_output
-    while count < num_output:
-        print ("{0} @ {1} : {2}".format(count,pressures[count][2],pressures[count][5]))
+    while count < len(pressures):
+        print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
 
 def match_cache(weather_location):
@@ -126,10 +128,12 @@ pressures.sort() # because key 0 is epochtime
 
 loop_calculations()
 write_cache()
+print ("hi")
+show_calculations(52)
+
 #writelines takes a list of strings as argument and writes them WITHOUT NEWLINES to file obj.  So maybe take the list of pressures and converts it to strings to write?
 # is it quicker to just rewrite the cache, or to check for existing values?
 
-show_calculations(52)
 
 # for last (user input?) entries, output the generated values
 # graphics to output colored data (no idea yet)
