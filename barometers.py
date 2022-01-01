@@ -1,11 +1,12 @@
 import pathlib
 import pickle
+from PIL import Image, ImageDraw
 
 # TODO:  Max entries as passed variable
 
 pressures = []
 cur_path = pathlib.Path()
-colors = { "-16":(255, 255, 255),"-15":(255, 224, 224),"-14":(255, 192, 192), 
+my_colors = { "-16":(255, 255, 255),"-15":(255, 224, 224),"-14":(255, 192, 192), 
     "-13":(255, 160, 160),"-12":(255, 128, 128),"-11":(255, 96, 96),  
     "-10":(255, 64, 64),"-9":(255, 32, 32),"-8":(255, 0, 0),"-7":(224, 0, 0), 
     "-6":(192, 0, 0),"-5":(160, 0, 0),"-4":(128, 0, 0),"-3":(96, 0, 0), 
@@ -133,7 +134,23 @@ pressures.sort() # because key 0 is epochtime
 
 loop_calculations()
 write_cache()
-show_calculations(52)
+show_calculations(64)
 
 
-# each block 10x10
+# this will all move to a function in a sec
+# use looping like show_calc, except incrementing values by 8
+# each block 8x8
+img = Image.new('RGB', (512, 512), (125, 125, 125))
+# for each section - get value of change. Compare to dict.
+# if over 16/-16, then use 16/-16
+# my_colors['number']  returns RGB tuple for fill
+# Write colored block 
+# increment count (and placement)
+draw = ImageDraw.Draw(img)
+#draw.rectangle(xy, fill=None, outline=None)
+
+draw.rectangle(
+   (200, 125, 300, 200),
+   fill=(255, 0, 0),
+   outline=(0, 0, 0))
+img.show()
