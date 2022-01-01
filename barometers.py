@@ -1,17 +1,22 @@
 import pathlib
 import pickle
 
-#can use a generator object to produce the various values in python by comparing positionals without having to store them in arrays holy shit
-# data structure
-# pressures = [ epoch, date, time, imp_pressure, unit, metric_pressure, unit, calc_sign(tuple) ] 
-# store with sign, calculate abs each time.
-# (optionally - look at cache file as well and read it into dict first?)
-# get locnumber from file name
+# TODO:  Max entries as passed variable
 
 pressures = []
 cur_path = pathlib.Path()
+colors = { "-16":(255, 255, 255),"-15":(255, 224, 224),"-14":(255, 192, 192), 
+    "-13":(255, 160, 160),"-12":(255, 128, 128),"-11":(255, 96, 96),  
+    "-10":(255, 64, 64),"-9":(255, 32, 32),"-8":(255, 0, 0),"-7":(224, 0, 0), 
+    "-6":(192, 0, 0),"-5":(160, 0, 0),"-4":(128, 0, 0),"-3":(96, 0, 0), 
+    "-2":(64, 0, 0),"-1":(32, 0, 0),"0" : (0, 0, 0), "16":(255, 255, 255), 
+    "15":(224, 224, 255),"14":(192, 192, 255),"13":(160, 160, 255),
+    "12":(128, 128, 255),"11":(96, 96, 255),"10":(64, 64, 255),
+    "9":(32, 32, 255),"8":(0, 0, 255),"7":(0, 0, 224),"6":(0, 0, 192),
+    "5":(0, 0, 160),"4":(0, 0, 128),"3":(0, 0, 96),"2":(0, 0, 64),
+    "1":(0, 0, 32),"0":(0, 0, 0)}
 
-# TODO:  Max entries as passed variable
+
 
 def read_in_file(in_file):
     """ Reading in the new file into the pressures data structure """ 
@@ -128,12 +133,7 @@ pressures.sort() # because key 0 is epochtime
 
 loop_calculations()
 write_cache()
-print ("hi")
 show_calculations(52)
 
-#writelines takes a list of strings as argument and writes them WITHOUT NEWLINES to file obj.  So maybe take the list of pressures and converts it to strings to write?
-# is it quicker to just rewrite the cache, or to check for existing values?
 
-
-# for last (user input?) entries, output the generated values
-# graphics to output colored data (no idea yet)
+# each block 10x10
