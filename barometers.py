@@ -4,8 +4,12 @@ from PIL import Image, ImageDraw
 
 # TODO: Max entries as passed variable
 # TODO: Graph over chart?  https://www.blog.pythonlibrary.org/2021/02/23/drawing-shapes-on-images-with-python-and-pillow/
-# TODO: Labeling on chart
+# TODO: Ensure range for graph not > 64
 # TODO: Maybe change color scale?
+
+# Note on the data structure for pressures
+# pressures = epoch,date,time,pressure imperial,pressure metric, calc[64]
+
 
 pressures = []
 cur_path = pathlib.Path()
@@ -28,7 +32,7 @@ def read_in_file(in_file):
     
     
     with open(in_file, 'r') as infile:
-        for row in infile:            # DO I NEED AN EXPLICIT READLINE HERE? I don't think so...
+        for row in infile:            
             row = row.replace("@", ",")
             row = row.strip()
             if row.find(",,") != -1:
@@ -93,8 +97,35 @@ def show_calculations(num_output):
     print("{0}".format(last))
     count = last - num_output
     while count < len(pressures):
-        print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
+        #print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
+
+def data_for_my_graph(num_output=64):
+    """ Draw the line graph over the chart """
+    global pressures
+
+    my_points = []
+    last = len(pressures)
+    count = last - num_output
+
+    while count < len(pressures):
+        my_points.append(int(pressures[count][4]))
+        count += 1
+    
+    range = max(my_points) - min(my_points)
+    my_max=max(my_points)
+    
+    print("{0} - {1} {2}".format(range,max(my_points),min(my_points)))
+    # if range > 64 we will need to do something
+    # if num_output > 64 we will need to do something
+    
+    my_plot = []
+    count = 0
+    while count < len(my_points):
+        point=(my_max - my_points[count]) * 60
+        my_plot.append(tuple([(count*8)+46,point]))
+        count += 1
+    return my_plot
 
 def match_cache(weather_location):
     """ See if a pickled cache file exists for the rawfile we're reading in """
@@ -125,14 +156,16 @@ def make_chart(num_output = 64):
         while x_counter < 64:
             fill_color = my_colors.get(pressures[count][5][x_counter], (255, 255, 255))           
             x = (x_counter * 8) + 49
-            print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
+            #print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
 
         draw.text((5, y), str(pressures[count][2]), fill=(255,255,0))
         count += 1
         y += 8
-        
+    
+    points = data_for_my_graph(num_output)
+    draw.line(points, width=5, fill="green", joint="curve")    
     my_image.save('signed_color.png')
 
 
@@ -151,7 +184,7 @@ def make_abs_chart(num_output = 64):
         while x_counter < 64:
             fill_color = my_colors.get(abs(int(pressures[count][5][x_counter])), (255, 255, 255))
             x = (x_counter * 8) + 40
-            print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
+            #print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
             
@@ -159,6 +192,8 @@ def make_abs_chart(num_output = 64):
         count += 1
         y += 8
         
+    points = data_for_my_graph(num_output)
+    draw.line(points, width=5, fill="green", joint="curve")    
     my_image.save('abs_color.png')
 
 
