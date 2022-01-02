@@ -115,7 +115,7 @@ def make_chart(num_output = 64):
     global pressures
     global my_colors
     
-    my_image = Image.new('RGB', (512, 512), (125, 125, 125))
+    my_image = Image.new('RGB', (552, 512), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
     last = len(pressures)
     count = last - num_output
@@ -124,11 +124,12 @@ def make_chart(num_output = 64):
         x_counter = 0
         while x_counter < 64:
             fill_color = my_colors.get(pressures[count][5][x_counter], (255, 255, 255))           
-            x = x_counter * 8
+            x = (x_counter * 8) + 49
             print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
-            draw.rectangle((y, x, y + 8, x + 8), fill=(fill_color) , outline=None)
+            draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
 
+        draw.text((5, y), str(pressures[count][2]), fill=(255,255,0))
         count += 1
         y += 8
         
@@ -149,11 +150,12 @@ def make_abs_chart(num_output = 64):
         x_counter = 0
         while x_counter < 64:
             fill_color = my_colors.get(abs(int(pressures[count][5][x_counter])), (255, 255, 255))
-            x = x_counter * 8
+            x = (x_counter * 8) + 40
             print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
-            draw.rectangle((y, x, y + 8, x + 8), fill=(fill_color) , outline=None)
+            draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
-
+            
+        draw.text((5, y), str(pressures[count][2]), fill=(255,255,0))
         count += 1
         y += 8
         
