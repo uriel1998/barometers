@@ -2,9 +2,10 @@ import pathlib
 import pickle
 from PIL import Image, ImageDraw
 
-# TODO:  Max entries as passed variable
+# TODO: Max entries as passed variable
 # TODO: Graph over chart?  https://www.blog.pythonlibrary.org/2021/02/23/drawing-shapes-on-images-with-python-and-pillow/
-
+# TODO: Labeling on chart
+# TODO: Maybe change color scale?
 
 pressures = []
 cur_path = pathlib.Path()
