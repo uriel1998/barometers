@@ -17,12 +17,10 @@ my_colors = { -16:(255, 255, 255),-15:(255, 224, 224),-14:(255, 192, 192),
     -13:(255, 160, 160),-12:(255, 128, 128),-11:(255, 96, 96),  
     -10:(255, 64, 64),-9:(255, 32, 32),-8:(255, 0, 0),-7:(224, 0, 0), 
     -6:(192, 0, 0),-5:(160, 0, 0),-4:(128, 0, 0),-3:(96, 0, 0), 
-    -2:(64, 0, 0),-1:(32, 0, 0),0 : (0, 0, 0), 16:(255, 255, 255), 
-    15:(224, 224, 255),14:(192, 192, 255),13:(160, 160, 255),
-    12:(128, 128, 255),11:(96, 96, 255),10:(64, 64, 255),
-    9:(32, 32, 255),8:(0, 0, 255),7:(0, 0, 224),6:(0, 0, 192),
-    5:(0, 0, 160),4:(0, 0, 128),3:(0, 0, 96),2:(0, 0, 64),
-    1:(0, 0, 32),0:(0, 0, 0)}
+    -2:(64, 0, 0),-1:(32, 0, 0),0 : (0, 0, 0),15:(255,236,224),14:(255,216,192),
+    13:(255,196,160),12:(255,176,128),11:(255,156,96),10:(255,136,64),
+    9:(255,116,32),8:(255,96,0),7:(224,84,0),6:(192,72,0),5:(160,60,0),
+    4:(128,48,0),3:(96,36,0),2:(64,24,0),1:(32,12,0)}
 
 
 
@@ -114,7 +112,7 @@ def data_for_my_graph(num_output=64):
     
     range = max(my_points) - min(my_points)
     my_max=max(my_points)
-    
+    my_min=min(my_points)
     print("{0} - {1} {2}".format(range,max(my_points),min(my_points)))
     # if range > 64 we will need to do something
     # if num_output > 64 we will need to do something
@@ -122,9 +120,10 @@ def data_for_my_graph(num_output=64):
     my_plot = []
     count = 0
     while count < len(my_points):
-        point=(my_max - my_points[count]) * 60
-        my_plot.append(tuple([(count*8)+46,point]))
+        point=512-((my_max - my_points[count]) * 60)
+        my_plot.append(tuple([point+46,(count*8)]))
         count += 1
+    print("{0}".format(my_plot))
     return my_plot
 
 def match_cache(weather_location):
