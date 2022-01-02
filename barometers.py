@@ -3,19 +3,21 @@ import pickle
 from PIL import Image, ImageDraw
 
 # TODO:  Max entries as passed variable
+# TODO: Graph over chart?  https://www.blog.pythonlibrary.org/2021/02/23/drawing-shapes-on-images-with-python-and-pillow/
+
 
 pressures = []
 cur_path = pathlib.Path()
-my_colors = { "-16":(255, 255, 255),"-15":(255, 224, 224),"-14":(255, 192, 192), 
-    "-13":(255, 160, 160),"-12":(255, 128, 128),"-11":(255, 96, 96),  
-    "-10":(255, 64, 64),"-9":(255, 32, 32),"-8":(255, 0, 0),"-7":(224, 0, 0), 
-    "-6":(192, 0, 0),"-5":(160, 0, 0),"-4":(128, 0, 0),"-3":(96, 0, 0), 
-    "-2":(64, 0, 0),"-1":(32, 0, 0),"0" : (0, 0, 0), "16":(255, 255, 255), 
-    "15":(224, 224, 255),"14":(192, 192, 255),"13":(160, 160, 255),
-    "12":(128, 128, 255),"11":(96, 96, 255),"10":(64, 64, 255),
-    "9":(32, 32, 255),"8":(0, 0, 255),"7":(0, 0, 224),"6":(0, 0, 192),
-    "5":(0, 0, 160),"4":(0, 0, 128),"3":(0, 0, 96),"2":(0, 0, 64),
-    "1":(0, 0, 32),"0":(0, 0, 0)}
+my_colors = { -16:(255, 255, 255),-15:(255, 224, 224),-14:(255, 192, 192), 
+    -13:(255, 160, 160),-12:(255, 128, 128),-11:(255, 96, 96),  
+    -10:(255, 64, 64),-9:(255, 32, 32),-8:(255, 0, 0),-7:(224, 0, 0), 
+    -6:(192, 0, 0),-5:(160, 0, 0),-4:(128, 0, 0),-3:(96, 0, 0), 
+    -2:(64, 0, 0),-1:(32, 0, 0),0 : (0, 0, 0), 16:(255, 255, 255), 
+    15:(224, 224, 255),14:(192, 192, 255),13:(160, 160, 255),
+    12:(128, 128, 255),11:(96, 96, 255),10:(64, 64, 255),
+    9:(32, 32, 255),8:(0, 0, 255),7:(0, 0, 224),6:(0, 0, 192),
+    5:(0, 0, 160),4:(0, 0, 128),3:(0, 0, 96),2:(0, 0, 64),
+    1:(0, 0, 32),0:(0, 0, 0)}
 
 
 
@@ -67,7 +69,7 @@ def perform_calculations(row):
     signed_calc = []  # maybe?
     count = 0
     if len(pressures[row]) == 5:   # no tuple in that row
-        while count < 52:
+        while count < 64:
             then = pressures[int(row) - int(count)][4]
             signed_calc.append(int(now) - int(then))
             count += 1
@@ -107,6 +109,57 @@ def match_cache(weather_location):
     except FileNotFoundError:
         print("No cache exists for location {0}".format(cache_file))   
 
+def make_chart(num_output = 64):
+    """ Create output graphic chart with signed data """
+    global pressures
+    global my_colors
+    
+    my_image = Image.new('RGB', (512, 512), (125, 125, 125))
+    draw = ImageDraw.Draw(my_image)
+    last = len(pressures)
+    count = last - num_output
+    y = 0
+    while count < len(pressures):  # row count        
+        x_counter = 0
+        while x_counter < 64:
+            fill_color = my_colors.get(pressures[count][5][x_counter], (255, 255, 255))           
+            x = x_counter * 8
+            print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
+            draw.rectangle((y, x, y + 8, x + 8), fill=(fill_color) , outline=None)
+            x_counter += 1
+
+        count += 1
+        y += 8
+        
+    my_image.save('signed_color.png')
+
+
+def make_abs_chart(num_output = 64):
+    """ Create output graphic chart with signed data """
+    global pressures
+    global my_colors
+    
+    my_image = Image.new('RGB', (512, 512), (125, 125, 125))
+    draw = ImageDraw.Draw(my_image)
+    last = len(pressures)
+    count = last - num_output
+    y = 0
+    while count < len(pressures):  # row count        
+        x_counter = 0
+        while x_counter < 64:
+            fill_color = my_colors.get(abs(int(pressures[count][5][x_counter])), (255, 255, 255))
+            x = x_counter * 8
+            print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
+            draw.rectangle((y, x, y + 8, x + 8), fill=(fill_color) , outline=None)
+            x_counter += 1
+
+        count += 1
+        y += 8
+        
+    my_image.save('abs_color.png')
+
+
+
 def write_cache():
     """ Writing pickled info to cache """
     global pressures
@@ -135,22 +188,5 @@ pressures.sort() # because key 0 is epochtime
 loop_calculations()
 write_cache()
 show_calculations(64)
-
-
-# this will all move to a function in a sec
-# use looping like show_calc, except incrementing values by 8
-# each block 8x8
-img = Image.new('RGB', (512, 512), (125, 125, 125))
-# for each section - get value of change. Compare to dict.
-# if over 16/-16, then use 16/-16
-# my_colors['number']  returns RGB tuple for fill
-# Write colored block 
-# increment count (and placement)
-draw = ImageDraw.Draw(img)
-#draw.rectangle(xy, fill=None, outline=None)
-
-draw.rectangle(
-   (200, 125, 300, 200),
-   fill=(255, 0, 0),
-   outline=(0, 0, 0))
-img.show()
+make_chart(64)
+make_abs_chart(64)
