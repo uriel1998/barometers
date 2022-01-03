@@ -120,8 +120,8 @@ def data_for_my_graph(num_output=64):
     my_plot = []
     count = 0
     while count < len(my_points):
-        point=512-((my_max - my_points[count]) * 60)
-        my_plot.append(tuple([point+46,(count*8)]))
+        point=512-((my_max - my_points[count]) * 60) # rotating graph, hopefully keeping it within range of 512
+        my_plot.append(tuple([point+46,(count*8)]))  # +46 to leave room for labels
         count += 1
     print("{0}".format(my_plot))
     return my_plot
