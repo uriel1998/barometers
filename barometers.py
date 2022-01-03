@@ -2,9 +2,9 @@
 
 import pathlib
 import linecache
-import pickle, sys, string, argparse
+import pickle, sys, string, argparse, datetime
 from PIL import Image, ImageDraw
-from datetime import datetime, timedelta
+
 
 pressures = []
 cur_path = pathlib.Path()
@@ -135,7 +135,7 @@ def data_for_my_graph(start, num_output=64,last = len(pressures)):
     global pressures
 
     my_points = []
-    
+
     if not start:
         start = last - num_output
         
@@ -147,7 +147,7 @@ def data_for_my_graph(start, num_output=64,last = len(pressures)):
     while count < last:
         my_points.append(int(pressures[count][4]))
         count += 1
-    
+       
     my_range = max(my_points) - min(my_points)
     my_scalar = 0
     while (450 - (my_range * my_scalar)) > 1:
@@ -187,13 +187,11 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
     if not start:
         start = last - num_output
         
-        
     if start < 0:
         count = 0
     else:
         count = start 
 
-    print ("{0}:{1}".format(count,last))
     y = 0
     while count < last:  # row count        
         x_counter = 0
@@ -208,7 +206,6 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
                 fill_color = _my_colors.get(pressures[count][5][x_counter], (255, 255, 255))           
             
             x = (x_counter * 8) + 49
-            #print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
 
@@ -238,9 +235,7 @@ def make_abs_chart(start, last = len(pressures), num_output = 64,linegraph = Fal
     else:
         count = start 
 
-
     count = last - num_output
-    print ("{0}:{1}".format(count,last))
     y = 0
     while count < last:  # row count        
         x_counter = 0
@@ -255,7 +250,6 @@ def make_abs_chart(start, last = len(pressures), num_output = 64,linegraph = Fal
                 fill_color = _my_colors.get(1-(abs(pressures[count][5][x_counter])), (255, 255, 255))           
 
             x = (x_counter * 8) + 40
-            #print ("x = {0} y = {1} color = {2}".format(x,y,fill_color))
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
             
@@ -288,7 +282,7 @@ def main():
     """ main loop """
     
     parser = argparse.ArgumentParser(usage=__doc__)
-    parser.add_argument("-d", "--display-records", type=int, help="number of records back to show", default=64,action='store',dest='num_output')
+    parser.add_argument("-d", "--display-records", type=int, help="number of records back to show", default=None,action='store',dest='num_output')
     parser.add_argument("-a", "--add-records", type=int, help="max number of records to add from input files", default=256,action='store',dest='num_input')
     parser.add_argument("-c", "--show-calc", dest="showcalc",action='store_true', default=False, help="Show calc on stdout")
     parser.add_argument("-l", "--line-graph", dest="linegraph",action='store_true', default=False, help="Produce line graph overlay")
@@ -296,8 +290,8 @@ def main():
     parser.add_argument("-S", "--signed-values", dest="signval",action='store_true', default=False, help="Produce signed value chart")
     parser.add_argument("-A", "--abs-values", dest="absval",action='store_true', default=False, help="Produce abs value chart")
     parser.add_argument("-t", "--test", dest="test",action='store_true', default=False, help="Test mode: reads from stdin")
-    parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the start date for chart or calculation data.")
-    parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the end date for chart or calculation data; optional, only makes sense with --begin-date.")
+    parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None,help="Provide the start date for chart or calculation data.")
+    parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None,help="Provide the end date for chart or calculation data; optional, only makes sense with --begin-date.")
     
         
     #parser.add_argument('-f', '--file', action='store',dest='media_fn', nargs='+')
@@ -327,25 +321,38 @@ def main():
         # date selection
         # calculating both start point and num_output        
         if args.start_date:           
-            indexing_list = [row[1] for row in pressures for col in row] # list of just dates
-            start_date = datetime.strptime(args.start_date, "%Y-%m-%d") # may be unneeded, but hey.
-            start_row = indexing_list.index(start_date)
+            start_output = 0
+            while start_output < len(pressures):
+                if pressures[start_output][1] == args.start_date:
+                    break
+                start_output += 1
             
             if not args.end_date:
                 # inclusive, effectively EOF thanks to next line
-                end_date = datetime.strptime(localtime(), "%Y-%m-%d") 
-            
+                end_date = str(datetime.date.today())
+
             if not args.num_output:
-                end_date = datetime.strptime(args.end_date, "%Y-%m-%d")
-                indexing_list.reverse()
-                end_row = len(indexing_list) - indexing_list.index(end_date)
-                num_output = end_row - start_row
+                end_date = args.end_date
+                end_row = start_output
+                while end_row < len(pressures):
+                    if pressures[end_row][1] == end_date:
+                        while end_row < len(pressures):
+                            if pressures[end_row][1] != end_date:
+                                break
+                            else:
+                                end_row += 1
+                    end_row += 1
+                num_output = end_row - start_output
             else:
                 num_output = args.num_output
+                end_row = start_output + num_output
         else: 
             # defaults if date is not selected
             num_output = args.num_output # because there's default
             start_output = len(pressures) - num_output
+            end_row = len(pressures)
+
+        if end_row > len(pressures):
             end_row = len(pressures)
             
         if args.showcalc:
