@@ -153,7 +153,7 @@ def match_cache(weather_location):
     except FileNotFoundError:
         print("No cache exists for location {0}".format(cache_file))   
 
-def make_chart(num_output = 64):
+def make_chart(num_output = 64, linegraph = False):
     """ Create output graphic chart with signed data """
     global pressures
     global my_colors
@@ -177,12 +177,14 @@ def make_chart(num_output = 64):
         count += 1
         y += 8
     
-    points = data_for_my_graph(num_output)
-    draw.line(points, width=5, fill="green", joint="curve")    
+    if linegraph = True:
+        points = data_for_my_graph(num_output)
+        draw.line(points, width=5, fill="green", joint="curve")    
+    
     my_image.save('signed_color.png')
 
 
-def make_abs_chart(num_output = 64):
+def make_abs_chart(num_output = 64,linegraph = False):
     """ Create output graphic chart with ABS data """
     global pressures
     global my_colors
@@ -205,8 +207,9 @@ def make_abs_chart(num_output = 64):
         count += 1
         y += 8
         
-    points = data_for_my_graph(num_output)
-    draw.line(points, width=5, fill="green", joint="curve")    
+    if linegraph = True:
+        points = data_for_my_graph(num_output)
+        draw.line(points, width=5, fill="green", joint="curve")    
     my_image.save('abs_color.png')
 
 
@@ -237,6 +240,7 @@ def main():
     parser.add_argument("-A", "--abs-values", dest="absval",action='store_true', default=False, help="Produce abs value chart")
     parser.add_argument("-t", "--test", dest="test",action='store_true', default=False, help="Test mode: reads from stdin")
     #parser.add_argument('-f', '--file', action='store',dest='media_fn', nargs='+')
+    #parser.add_argument('-d', '--dir', action='store',dest='media_fn', nargs='+')
     args = parser.parse_args()
 
     #print ('Media file is ', args.media_fn)
@@ -258,9 +262,10 @@ def main():
         write_cache()
         if args.showcalc:
             show_calculations(args.num_output)
-        
-        make_chart(args.num_output)
-        make_abs_chart(args.num_output)
+        if args.signval:
+            make_chart(args.num_output,args.linegraph)
+        if args.absval:
+            make_abs_chart(args.num_output,args.linegraph)
 
 
 if __name__ == '__main__':
