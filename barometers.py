@@ -1,9 +1,11 @@
 #! /usr/bin/env python3
 
 import pathlib
+import linecache
 import pickle, sys, string, argparse
 from PIL import Image, ImageDraw
 
+# implement all the switches I wrote in there, lol
 # TODO: Max entries as passed variable
 # TODO: select time period as passed interval
 # TODO: Graph over chart?  https://www.blog.pythonlibrary.org/2021/02/23/drawing-shapes-on-images-with-python-and-pillow/
@@ -27,46 +29,56 @@ my_colors = { -16:(255, 255, 255),-15:(255, 224, 224),-14:(255, 192, 192),
 
 
 
-def read_in_file(in_file):
+def read_in_file(in_file,num_input=256):
     """ Reading in the new file into the pressures data structure """ 
     global pressures
     
+    with open(in_file) as f:
+        rowcount = sum(1 for line in f)
+
+    if rowcount < num_input:
+        count = 0
+        num_input = rowcount
+    else:
+        count = rowcount - num_input
     
-    with open(in_file, 'r') as infile:
-        for row in infile:            
-            row = row.replace("@", ",")
-            row = row.strip()
-            if row.find(",,") != -1:
+    print ("{0} : {1}".format(count,rowcount))
+    while count < rowcount:
+        count += 1
+        row = linecache.getline(str(in_file), count)
+        #print('{0}'.format(linecache.getline(str(in_file), count)))
+        row = row.replace("@", ",")
+        row = row.strip()
+        if row.find(",,") != -1:
+            continue
+        else: 
+            # epochtime
+            # Oh, yeah, we didn't want units did we.
+            list_to_add = row.split(',',7)
+            if list_to_add[0] == "epoch":
                 continue
-            else: 
-                # epochtime
-                # Oh, yeah, we didn't want units did we.
-                list_to_add = row.split(',',7)
-                if list_to_add[0] == "epoch":
-                    continue
-                else:
-                    dupe = 0
-                    for c1 in pressures:
-                        if c1[1] == list_to_add[1]:
-                            if c1[2] == list_to_add[2]:
-                                dupe = 1
+            else:
+                dupe = 0
+                for c1 in pressures:
+                    if c1[1] == list_to_add[1]:
+                        if c1[2] == list_to_add[2]:
+                            dupe = 1
 
-                    if dupe != 1:
-                        #print("adding {0} {1} {2}".format(list_to_add[0],list_to_add[1],list_to_add[2]))
-                        # taking out units if they exist
-                        try:
-                            list_to_add.remove("hPa")
-                        except ValueError:
-                            print("already clean")
-                        
-                        try: 
-                            list_to_add.remove("in")
-                        except ValueError:
-                            print("already clean")
-                                    
-                        pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
+                if dupe != 1:
+                    #print("adding {0} {1} {2}".format(list_to_add[0],list_to_add[1],list_to_add[2]))
+                    # taking out units if they exist
+                    try:
+                        list_to_add.remove("hPa")
+                    except ValueError:
+                        print("already clean")
+                    
+                    try: 
+                        list_to_add.remove("in")
+                    except ValueError:
+                        print("already clean")
+                                
+                    pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
 
-    infile.close
 
 def perform_calculations(row):
     """ Calculate the values for calc_signed for the specified row in pressures array """
@@ -217,29 +229,38 @@ def main():
     """ main loop """
     
     parser = argparse.ArgumentParser(usage=__doc__)
-    parser.add_argument("num", nargs='*')
-    
-    parser.add_argument("-t", "--test", dest="test",
-    action='store_true', default=False,
-    help="Test mode: reads from stdin")
+    parser.add_argument("-s", "--show-records", type=int, help="number of records back to show", default=64,action='store',dest='num_output')
+    parser.add_argument("-a", "--add-records", type=int, help="max number of records to add from input files", default=256,action='store',dest='num_input')
+    parser.add_argument("-c", "--show-calc", dest="showcalc",action='store_true', default=False, help="Show calc on stdout")
+    parser.add_argument("-l", "--line-graph", dest="linegraph",action='store_true', default=False, help="Produce line graph overlay")
+    parser.add_argument("-S", "--signed-values", dest="signval",action='store_true', default=False, help="Produce signed value chart")
+    parser.add_argument("-A", "--abs-values", dest="absval",action='store_true', default=False, help="Produce abs value chart")
+    parser.add_argument("-t", "--test", dest="test",action='store_true', default=False, help="Test mode: reads from stdin")
+    #parser.add_argument('-f', '--file', action='store',dest='media_fn', nargs='+')
     args = parser.parse_args()
+
+    #print ('Media file is ', args.media_fn)
+    #print ('Message is ', args.message)    
+
     if args.test:
         test()
     else:
         for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
 
-            weather_location = str(rawfile.name.split('_',1)[0])
+            weather_location = str(rawfile.stem.split('_',1)[0])
             match_cache(weather_location)
             print("Reading in {0}".format(rawfile))
-            read_in_file(rawfile)
+            read_in_file(rawfile,args.num_input)
 
         pressures.sort() # because key 0 is epochtime
 
         loop_calculations()
         write_cache()
-        show_calculations(64)
-        make_chart(256)
-        make_abs_chart(64)
+        if args.showcalc:
+            show_calculations(args.num_output)
+        
+        make_chart(args.num_output)
+        make_abs_chart(args.num_output)
 
 
 if __name__ == '__main__':
