@@ -11,8 +11,16 @@ cache and reports out how many records and from what dates/times.
 Output is controlled by command line switches.
 
 # TODO: select time period as passed interval
+
+    If number of output is not set, defaults to 256
+    If start_date is set and end date is set, shows between those two inclusive
+    If start_date is set and num_output is set, starts at start_date and shows num_output
+    If start_date is set, and num output not set, defaults to end of data
+    
+
 # TODO: Incorporate gathering data as well?
 # TODO: Check intervals for equivalent time passage
+# TODO: Line-only graph
 # Line graph auto scales!
 
 # Note on the data structure for pressures

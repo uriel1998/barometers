@@ -113,24 +113,38 @@ def loop_calculations():
         perform_calculations(count)
         count += 1
 
-def show_calculations(num_output):
+def show_calculations(num_output = 64,last = len(pressures)):
     """ Display the tuples for the requested number of intervals back """
     global pressures
     
-    last = len(pressures)
-    count = last - num_output
+
+    if not start:
+        start = last - num_output
+        
+    if start < 0:
+        count = 0
+    else:
+        count = start 
+
     while count < len(pressures):
         print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
 
-def data_for_my_graph(num_output=64):
+def data_for_my_graph(start, num_output=64,last = len(pressures)):
     """ Draw the line graph over the chart """
     global pressures
 
     my_points = []
-    last = len(pressures)
-    count = last - num_output
-    while count < len(pressures):
+    
+    if not start:
+        start = last - num_output
+        
+    if start < 0:
+        count = 0
+    else:
+        count = start 
+ 
+    while count < last:
         my_points.append(int(pressures[count][4]))
         count += 1
     
@@ -163,16 +177,25 @@ def match_cache(weather_location):
     except FileNotFoundError:
         print("No cache exists for location {0}".format(cache_file))   
 
-def make_chart(num_output = 64, linegraph = False, scheme = None):
+def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None):
     """ Create output graphic chart with signed data """
     global pressures
     
     my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
-    last = len(pressures)
-    count = last - num_output
+
+    if not start:
+        start = last - num_output
+        
+        
+    if start < 0:
+        count = 0
+    else:
+        count = start 
+
+    print ("{0}:{1}".format(count,last))
     y = 0
-    while count < len(pressures):  # row count        
+    while count < last:  # row count        
         x_counter = 0
         while x_counter < 64:
             if scheme == "wide":
@@ -194,22 +217,32 @@ def make_chart(num_output = 64, linegraph = False, scheme = None):
         y += 8
     
     if linegraph == True:
-        points = data_for_my_graph(num_output)
+        points = data_for_my_graph(start,num_output,last)
         draw.line(points, width=5, fill="green", joint="curve")    
     
     my_image.save('signed_color.png')
 
 
-def make_abs_chart(num_output = 64,linegraph = False,scheme = None):
+def make_abs_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None):
     """ Create output graphic chart with ABS data """
     global pressures
     
     my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
-    last = len(pressures)
+    
+    if not start:
+        start = last - num_output
+        
+    if start < 0:
+        count = 0
+    else:
+        count = start 
+
+
     count = last - num_output
+    print ("{0}:{1}".format(count,last))
     y = 0
-    while count < len(pressures):  # row count        
+    while count < last:  # row count        
         x_counter = 0
         while x_counter < 64:
             if scheme == "wide":
@@ -231,7 +264,7 @@ def make_abs_chart(num_output = 64,linegraph = False,scheme = None):
         y += 8
         
     if linegraph == True:
-        points = data_for_my_graph(num_output)
+        points = data_for_my_graph(start, num_output, last)
         draw.line(points, width=5, fill="green", joint="curve")    
     my_image.save('abs_color.png')
 
@@ -250,8 +283,6 @@ def write_cache():
     pickle.dump(pressures,file)
     file.close()
 
-
-
     
 def main():
     """ main loop """
@@ -266,7 +297,7 @@ def main():
     parser.add_argument("-A", "--abs-values", dest="absval",action='store_true', default=False, help="Produce abs value chart")
     parser.add_argument("-t", "--test", dest="test",action='store_true', default=False, help="Test mode: reads from stdin")
     parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the start date for chart or calculation data.")
-    parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the end date for chart or calculation data.")
+    parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the end date for chart or calculation data; optional, only makes sense with --begin-date.")
     
         
     #parser.add_argument('-f', '--file', action='store',dest='media_fn', nargs='+')
@@ -293,22 +324,38 @@ def main():
         print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
         print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
 
-        if args.start_date:
-            for x in pressures:
-                if x[1] == args.start_date:
-                    #do stuff
-        # if no end date, have end date be today?
-        # otherwise is there an easy way to match end date?
+        # date selection
+        # calculating both start point and num_output        
+        if args.start_date:           
+            indexing_list = [row[1] for row in pressures for col in row] # list of just dates
+            start_date = datetime.strptime(args.start_date, "%Y-%m-%d") # may be unneeded, but hey.
+            start_row = indexing_list.index(start_date)
             
-        if args.end_date:
-
+            if not args.end_date:
+                # inclusive, effectively EOF thanks to next line
+                end_date = datetime.strptime(localtime(), "%Y-%m-%d") 
+            
+            if not args.num_output:
+                end_date = datetime.strptime(args.end_date, "%Y-%m-%d")
+                indexing_list.reverse()
+                end_row = len(indexing_list) - indexing_list.index(end_date)
+                num_output = end_row - start_row
+            else:
+                num_output = args.num_output
+        else: 
+            # defaults if date is not selected
+            num_output = args.num_output # because there's default
+            start_output = len(pressures) - num_output
+            end_row = len(pressures)
+            
         if args.showcalc:
-            show_calculations(args.num_output)
-        if args.signval:
+            show_calculations(num_output)
             
-            make_chart(args.num_output,args.linegraph,args.scheme)
+        if args.signval:
+            make_chart(start_output,end_row,num_output,args.linegraph,args.scheme)
+            
         if args.absval:
-            make_abs_chart(args.num_output,args.linegraph,args.scheme)
+            make_abs_chart(start_output,end_row,num_output,args.linegraph,args.scheme)
 
 
 if __name__ == '__main__':
