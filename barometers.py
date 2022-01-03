@@ -5,11 +5,9 @@ import linecache
 import pickle, sys, string, argparse
 from PIL import Image, ImageDraw
 
-# implement all the switches I wrote in there, lol
-# TODO: Max entries as passed variable
+
 # TODO: select time period as passed interval
-# TODO: Graph over chart?  https://www.blog.pythonlibrary.org/2021/02/23/drawing-shapes-on-images-with-python-and-pillow/
-# TODO: Ensure range for graph not > 64
+# Line graph auto scales!
 
 
 # Note on the data structure for pressures
@@ -42,11 +40,10 @@ def read_in_file(in_file,num_input=256):
     else:
         count = rowcount - num_input
     
-    print ("{0} : {1}".format(count,rowcount))
+    #print ("{0} : {1}".format(count,rowcount))
     while count < rowcount:
         count += 1
         row = linecache.getline(str(in_file), count)
-        #print('{0}'.format(linecache.getline(str(in_file), count)))
         row = row.replace("@", ",")
         row = row.strip()
         if row.find(",,") != -1:
@@ -107,10 +104,9 @@ def show_calculations(num_output):
     global pressures
     
     last = len(pressures)
-    print("{0}".format(last))
     count = last - num_output
     while count < len(pressures):
-        #print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
+        print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
 
 def data_for_my_graph(num_output=64):
@@ -177,7 +173,7 @@ def make_chart(num_output = 64, linegraph = False):
         count += 1
         y += 8
     
-    if linegraph = True:
+    if linegraph == True:
         points = data_for_my_graph(num_output)
         draw.line(points, width=5, fill="green", joint="curve")    
     
@@ -207,7 +203,7 @@ def make_abs_chart(num_output = 64,linegraph = False):
         count += 1
         y += 8
         
-    if linegraph = True:
+    if linegraph == True:
         points = data_for_my_graph(num_output)
         draw.line(points, width=5, fill="green", joint="curve")    
     my_image.save('abs_color.png')
@@ -260,6 +256,8 @@ def main():
 
         loop_calculations()
         write_cache()
+        print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
+        print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
         if args.showcalc:
             show_calculations(args.num_output)
         if args.signval:
