@@ -4,7 +4,7 @@ import pathlib
 import linecache
 import pickle, sys, string, argparse
 from PIL import Image, ImageDraw
-
+from datetime import datetime, timedelta
 
 pressures = []
 cur_path = pathlib.Path()
@@ -249,6 +249,9 @@ def write_cache():
     file = open(cache_file, 'wb')
     pickle.dump(pressures,file)
     file.close()
+
+
+
     
 def main():
     """ main loop """
@@ -262,6 +265,10 @@ def main():
     parser.add_argument("-S", "--signed-values", dest="signval",action='store_true', default=False, help="Produce signed value chart")
     parser.add_argument("-A", "--abs-values", dest="absval",action='store_true', default=False, help="Produce abs value chart")
     parser.add_argument("-t", "--test", dest="test",action='store_true', default=False, help="Test mode: reads from stdin")
+    parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the start date for chart or calculation data.")
+    parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help="Provide the end date for chart or calculation data.")
+    
+        
     #parser.add_argument('-f', '--file', action='store',dest='media_fn', nargs='+')
     #parser.add_argument('-d', '--dir', action='store',dest='media_fn', nargs='+')
     args = parser.parse_args()
@@ -285,9 +292,20 @@ def main():
         write_cache()
         print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
         print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
+
+        if args.start_date:
+            for x in pressures:
+                if x[1] == args.start_date:
+                    #do stuff
+        # if no end date, have end date be today?
+        # otherwise is there an easy way to match end date?
+            
+        if args.end_date:
+
         if args.showcalc:
             show_calculations(args.num_output)
         if args.signval:
+            
             make_chart(args.num_output,args.linegraph,args.scheme)
         if args.absval:
             make_abs_chart(args.num_output,args.linegraph,args.scheme)
