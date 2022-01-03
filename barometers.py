@@ -7,8 +7,9 @@ from PIL import Image, ImageDraw
 
 
 # TODO: select time period as passed interval
+# TODO: Incorporate gathering data as well?
+# TODO: Check intervals for equivalent time passage
 # Line graph auto scales!
-
 
 # Note on the data structure for pressures
 # pressures = epoch,date,time,pressure imperial,pressure metric, calc[64]
