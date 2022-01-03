@@ -1,11 +1,14 @@
+#! /usr/bin/env python3
+
 import pathlib
-import pickle
+import pickle, sys, string, argparse
 from PIL import Image, ImageDraw
 
 # TODO: Max entries as passed variable
+# TODO: select time period as passed interval
 # TODO: Graph over chart?  https://www.blog.pythonlibrary.org/2021/02/23/drawing-shapes-on-images-with-python-and-pillow/
 # TODO: Ensure range for graph not > 64
-# TODO: Maybe change color scale?
+
 
 # Note on the data structure for pressures
 # pressures = epoch,date,time,pressure imperial,pressure metric, calc[64]
@@ -105,25 +108,23 @@ def data_for_my_graph(num_output=64):
     my_points = []
     last = len(pressures)
     count = last - num_output
-
     while count < len(pressures):
         my_points.append(int(pressures[count][4]))
         count += 1
     
-    range = max(my_points) - min(my_points)
+    my_range = max(my_points) - min(my_points)
+    my_scalar = 0
+    while (450 - (my_range * my_scalar)) > 1:
+        my_scalar += 1
+        
     my_max=max(my_points)
     my_min=min(my_points)
-    print("{0} - {1} {2}".format(range,max(my_points),min(my_points)))
-    # if range > 64 we will need to do something
-    # if num_output > 64 we will need to do something
-    
     my_plot = []
     count = 0
     while count < len(my_points):
-        point=512-((my_max - my_points[count]) * 60) # rotating graph, hopefully keeping it within range of 512
-        my_plot.append(tuple([point+46,(count*8)]))  # +46 to leave room for labels
+        point=(512-(abs(my_max - my_points[count]) * my_scalar)) 
+        my_plot.append(tuple([point,(count*8)]))  
         count += 1
-    print("{0}".format(my_plot))
     return my_plot
 
 def match_cache(weather_location):
@@ -145,7 +146,8 @@ def make_chart(num_output = 64):
     global pressures
     global my_colors
     
-    my_image = Image.new('RGB', (552, 512), (125, 125, 125))
+    
+    my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
     last = len(pressures)
     count = last - num_output
@@ -169,11 +171,11 @@ def make_chart(num_output = 64):
 
 
 def make_abs_chart(num_output = 64):
-    """ Create output graphic chart with signed data """
+    """ Create output graphic chart with ABS data """
     global pressures
     global my_colors
     
-    my_image = Image.new('RGB', (512, 512), (125, 125, 125))
+    my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
     last = len(pressures)
     count = last - num_output
@@ -196,7 +198,6 @@ def make_abs_chart(num_output = 64):
     my_image.save('abs_color.png')
 
 
-
 def write_cache():
     """ Writing pickled info to cache """
     global pressures
@@ -212,18 +213,37 @@ def write_cache():
     pickle.dump(pressures,file)
     file.close()
     
+def main():
+    """ main loop """
+    
+    parser = argparse.ArgumentParser(usage=__doc__)
+    parser.add_argument("num", nargs='*')
+    
+    parser.add_argument("-t", "--test", dest="test",
+    action='store_true', default=False,
+    help="Test mode: reads from stdin")
+    args = parser.parse_args()
+    if args.test:
+        test()
+    else:
+        for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
 
-for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
+            weather_location = str(rawfile.name.split('_',1)[0])
+            match_cache(weather_location)
+            print("Reading in {0}".format(rawfile))
+            read_in_file(rawfile)
 
-    weather_location = str(rawfile.name.split('_',1)[0])
-    match_cache(weather_location)
-    print("Reading in {0}".format(rawfile))
-    read_in_file(rawfile)
+        pressures.sort() # because key 0 is epochtime
 
-pressures.sort() # because key 0 is epochtime
+        loop_calculations()
+        write_cache()
+        show_calculations(64)
+        make_chart(256)
+        make_abs_chart(64)
 
-loop_calculations()
-write_cache()
-show_calculations(64)
-make_chart(64)
-make_abs_chart(64)
+
+if __name__ == '__main__':
+    main()
+else:
+    print("barometers loaded as a module")
+
