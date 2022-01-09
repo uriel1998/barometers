@@ -284,6 +284,6 @@ graph and legend, named `bar_signed.png` in the current directory:
 ## 7. ToDo
 
 * Rewrite `just_pressure` to be part of the python program and be simpler to set up.  
-* Check intervals for (roughly) equivalent time passage when displaying. 
+* Check intervals for (roughly) equivalent time passage when displaying - done, write into README
 * Check intervals for (roughly) equivalent time passage ON CALCULATIONS (there is no checking now)  
 * Create *only* a line graph.  
