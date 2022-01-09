@@ -1,5 +1,7 @@
 # reference, old shit
 1_reference/
+raw/
+cache/
 
 # macOS Junks
 .DS_Store

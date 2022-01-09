@@ -3,11 +3,12 @@
 import pathlib
 import linecache
 import pickle, sys, string, argparse, datetime
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 
 pressures = []
 cur_path = pathlib.Path()
+
 _my_colors = { -16:(255, 255, 255),-15:(255, 224, 224),-14:(255, 192, 192), 
     -13:(255, 160, 160),-12:(255, 128, 128),-11:(255, 96, 96),  
     -10:(255, 64, 64),-9:(255, 32, 32),-8:(255, 0, 0),-7:(224, 0, 0), 
@@ -48,13 +49,12 @@ def read_in_file(in_file,num_input=256):
     with open(in_file) as f:
         rowcount = sum(1 for line in f)
 
-    if rowcount < num_input:
+    if rowcount <= num_input:
         count = 0
         num_input = rowcount
     else:
         count = rowcount - num_input
     
-    #print ("{0} : {1}".format(count,rowcount))
     while count < rowcount:
         count += 1
         row = linecache.getline(str(in_file), count)
@@ -70,13 +70,12 @@ def read_in_file(in_file,num_input=256):
                 continue
             else:
                 dupe = 0
-                for c1 in pressures:
-                    if c1[1] == list_to_add[1]:
-                        if c1[2] == list_to_add[2]:
-                            dupe = 1
-
+                for c1 in pressures:                   
+                    if c1[1] == list_to_add[1] and c1[2] == list_to_add[2]:
+                        dupe = 1
+                
                 if dupe != 1:
-                    #print("adding {0} {1} {2}".format(list_to_add[0],list_to_add[1],list_to_add[2]))
+                    # print("adding {0} {1} {2}".format(list_to_add[0],list_to_add[1],list_to_add[2]))
                     # taking out units if they exist
                     try:
                         list_to_add.remove("hPa")
@@ -89,7 +88,7 @@ def read_in_file(in_file,num_input=256):
                         print("already clean")
                                 
                     pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
-
+    linecache.clearcache()
 
 def perform_calculations(row):
     """ Calculate the values for calc_signed for the specified row in pressures array """
@@ -113,11 +112,10 @@ def loop_calculations():
         perform_calculations(count)
         count += 1
 
-def show_calculations(num_output = 64,last = len(pressures)):
+def show_calculations(start = None, num_output = 64,last = len(pressures)):
     """ Display the tuples for the requested number of intervals back """
     global pressures
     
-
     if not start:
         start = last - num_output
         
@@ -129,6 +127,54 @@ def show_calculations(num_output = 64,last = len(pressures)):
     while count < len(pressures):
         print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
+
+
+def check_intervals(start, last = len(pressures), num_output = 64, interval = 1800, tolerance = 120):
+    """ Ensuring the intervals in the sample are roughly equivalent """
+    """ If auto interval, it should have None passed to it, otherwise default of 1800 sec """   
+    global pressures
+
+    my_times = []
+    rejected = 0
+    skipped = 0
+    
+    if not start:
+        start = last - num_output
+        
+    if start < 0:
+        count = 0
+    else:
+        count = start 
+ 
+    if not interval:
+        interval = (int(pressures[count + 1][0]) - int(pressures[count][0]))
+    tolerance = int(tolerance)
+    
+    my_multiplier = 0
+    start_time = int(pressures[start][0])
+    while count < last:  
+        now_time = int(pressures[count][0])
+        
+        if my_multiplier > 0:
+            da_difference = abs((start_time + (my_multiplier * interval)) - now_time)
+            if da_difference > tolerance:
+                print ("Timestamp {0} out of tolerance".format(now_time))
+                rejected += 1
+                da_difference2 = abs((start_time + (my_multiplier * (interval + 1))) - int(pressures[count+1][0]))
+                if da_difference2 > tolerance:
+                    print ("Next record also out of tolerance; erroneous output WILL happen")
+                else: 
+                    print ("Next record at correct interval; skipping.")
+            else:
+                my_times.append(pressures[count])  # appending that whole row
+                my_multiplier += 1
+        else:
+            my_times.append(pressures[count])  # is good
+            my_multiplier += 1
+
+        count += 1         
+    return my_times, rejected
+
 
 def data_for_my_graph(start, num_output=64,last = len(pressures)):
     """ Draw the line graph over the chart """
@@ -161,69 +207,29 @@ def data_for_my_graph(start, num_output=64,last = len(pressures)):
         point=(512-(abs(my_max - my_points[count]) * my_scalar)) 
         my_plot.append(tuple([point,(count*8)]))  
         count += 1
-    return my_plot
+    return my_plot, my_max, my_min, my_range
 
 def match_cache(weather_location):
     """ See if a pickled cache file exists for the rawfile we're reading in """
     global pressures
-    global cache_file
-    
+
     cache_file = cur_path.joinpath(cur_path.cwd(),'cache',weather_location)
+    cache_filename = str(cur_path.joinpath(cur_path.cwd(),'cache',weather_location))
     try:
-        file = open(cache_file, 'rb')
+        file = open(cache_filename, 'rb')
         print("Reading in cache for location {0}".format(weather_location))
         pressures = pickle.load(file)
         file.close()
     except FileNotFoundError:
         print("No cache exists for location {0}".format(cache_file))   
 
-def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None):
-    """ Create output graphic chart with signed data """
+def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 120):
+    """ Create output graphic chart data """
     global pressures
+    global cur_path
     
-    my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
-    draw = ImageDraw.Draw(my_image)
-
-    if not start:
-        start = last - num_output
-        
-    if start < 0:
-        count = 0
-    else:
-        count = start 
-
-    y = 0
-    while count < last:  # row count        
-        x_counter = 0
-        while x_counter < 64:
-            if scheme == "wide":
-                fill_color = _my_colors_wide.get(pressures[count][5][x_counter], (255, 255, 255))
-            elif scheme == "alt":
-                fill_color = _my_colors_alt.get(pressures[count][5][x_counter], (255, 255, 255))
-            elif scheme == "original":
-                fill_color = _my_colors_original.get(pressures[count][5][x_counter], (255, 255, 255))
-            else:
-                fill_color = _my_colors.get(pressures[count][5][x_counter], (255, 255, 255))           
-            
-            x = (x_counter * 8) + 49
-            draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
-            x_counter += 1
-
-        draw.text((5, y), str(pressures[count][2]), fill=(255,255,0))
-        count += 1
-        y += 8
-    
-    if linegraph == True:
-        points = data_for_my_graph(start,num_output,last)
-        draw.line(points, width=5, fill="green", joint="curve")    
-    
-    my_image.save('signed_color.png')
-
-
-def make_abs_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None):
-    """ Create output graphic chart with ABS data """
-    global pressures
-    
+    font = ImageFont.truetype("Arial", size=7)
+    font2 = ImageFont.truetype("Arial", size=15)
     my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
     
@@ -231,49 +237,74 @@ def make_abs_chart(start, last = len(pressures), num_output = 64,linegraph = Fal
         start = last - num_output
         
     if start < 0:
+        start = 0
         count = 0
     else:
         count = start 
-
     count = last - num_output
     y = 0
-    while count < last:  # row count        
+    da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
+    
+    # substituting in the check_intervals to give us a list to scroll through instead of pressures
+    da_times, da_rejected = check_intervals(start, last, num_output, None, 120)
+    print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
+    count = 0 # reassigning it since da_times is now the count
+    while count < len(da_times):  # row count        
         x_counter = 0
         while x_counter < 64:
-            if scheme == "wide":
-                fill_color = _my_colors_wide.get(abs(pressures[count][5][x_counter]), (254, 255, 255))
-            elif scheme == "alt":
-                fill_color = _my_colors_alt.get(abs(pressures[count][5][x_counter]), (255, 255, 255))
-            elif scheme == "original":
-                fill_color = _my_colors_original.get(abs(pressures[count][5][x_counter]), (255, 255, 255))
+            if is_abs:
+                if scheme == "wide":
+                    fill_color = _my_colors_wide.get(abs(da_times[count][5][x_counter]), (254, 255, 255))
+                elif scheme == "alt":
+                    fill_color = _my_colors_alt.get(abs(da_times[count][5][x_counter]), (255, 255, 255))
+                elif scheme == "original":
+                    fill_color = _my_colors_original.get(abs(da_times[count][5][x_counter]), (255, 255, 255))
+                else:
+                    fill_color = _my_colors.get(1-(abs(da_times[count][5][x_counter])), (255, 255, 255))           
             else:
-                fill_color = _my_colors.get(1-(abs(pressures[count][5][x_counter])), (255, 255, 255))           
+                if scheme == "wide":
+                    fill_color = _my_colors_wide.get(da_times[count][5][x_counter], (254, 255, 255))
+                elif scheme == "alt":
+                    fill_color = _my_colors_alt.get(da_times[count][5][x_counter], (255, 255, 255))
+                elif scheme == "original":
+                    fill_color = _my_colors_original.get(da_times[count][5][x_counter], (255, 255, 255))
+                else:
+                    fill_color = _my_colors.get(da_times[count][5][x_counter], (255, 255, 255))           
+                
 
             x = (x_counter * 8) + 40
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
-            
-        draw.text((5, y), str(pressures[count][2]), fill=(255,255,0))
+            draw.text((5, y), str(pressures[count][2]), fill="white", font=font)
         count += 1
         y += 8
         
     if linegraph == True:
-        points = data_for_my_graph(start, num_output, last)
-        draw.line(points, width=5, fill="green", joint="curve")    
-    my_image.save('abs_color.png')
+        points, da_max, da_min, da_range = data_for_my_graph(start, num_output, last)
+        draw.line(points, width=5, fill="green", joint="curve")  
+        da_string = "Max: {0} Min: {1} Range: {2}".format(da_max,da_min,da_range) 
+        draw.text((100, 45), da_string, fill="white", font=font2, stroke_width=2, stroke_fill="black")
+    
+    draw.text((100, 25), da_duration, fill="white", font=font2, stroke_width=2, stroke_fill="black")
 
+    if is_abs:
+        fn = "{0}_abs.png".format(stem)
+    else: 
+        fn = "{0}_signed.png".format(stem)
+    my_image.save(fn)
 
-def write_cache():
+def write_cache(weather_location):
     """ Writing pickled info to cache """
     global pressures
-    global cache_file    
-    
+
+    cache_file = cur_path.joinpath(cur_path.cwd(),'cache',weather_location)
+    cache_filename = str(cur_path.joinpath(cur_path.cwd(),'cache',weather_location))    
     try:
         cache_file.unlink()
     except FileNotFoundError:
         print ("Creating new cache {0}".format(cache_file))
     
-    file = open(cache_file, 'wb')
+    file = open(cache_filename, 'wb')
     pickle.dump(pressures,file)
     file.close()
 
@@ -289,84 +320,91 @@ def main():
     parser.add_argument("-s", "--scheme", dest="scheme",action='store', default=None, help="Color scheme - default, wide, alt, original")
     parser.add_argument("-S", "--signed-values", dest="signval",action='store_true', default=False, help="Produce signed value chart")
     parser.add_argument("-A", "--abs-values", dest="absval",action='store_true', default=False, help="Produce abs value chart")
-    parser.add_argument("-t", "--test", dest="test",action='store_true', default=False, help="Test mode: reads from stdin")
     parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None,help="Provide the start date for chart or calculation data.")
     parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None,help="Provide the end date for chart or calculation data; optional, only makes sense with --begin-date.")
-    
-        
-    #parser.add_argument('-f', '--file', action='store',dest='media_fn', nargs='+')
-    #parser.add_argument('-d', '--dir', action='store',dest='media_fn', nargs='+')
+    parser.add_argument('-f', '--file', action='store',dest='fn_stem', default="out",help="Stem for output filename, defaults to out_[abs|signed].png")
+    parser.add_argument('-v', '--verify', dest='to_verify', action='store_true', default=False,help="Verify interval ranges")
+    parser.add_argument('-i', '--interval', action='store',dest='verify_interval', default="1800",help="Expected interval in seconds, only makes sense with -v")
+    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance_range', default="120",help="Acceptable range in seconds, only makes sense with -v")
     args = parser.parse_args()
 
     #print ('Media file is ', args.media_fn)
     #print ('Message is ', args.message)    
 
-    if args.test:
-        test()
-    else:
-        for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
-
-            weather_location = str(rawfile.stem.split('_',1)[0])
-            match_cache(weather_location)
-            print("Reading in {0}".format(rawfile))
-            read_in_file(rawfile,args.num_input)
-
+    for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
+        test_stem = str(rawfile.stem).strip()
+        
+        if test_stem.find("_") > 0:
+            weather_location = test_stem.split('_',1)[0]
+        else:
+            weather_location = test_stem
+        
+        weather_location.strip()
+        match_cache(weather_location)
+        print("Reading in {0}".format(rawfile))
+        read_in_file(format(rawfile),args.num_input)
         pressures.sort() # because key 0 is epochtime
-
         loop_calculations()
-        write_cache()
-        print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
-        print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
+        write_cache(weather_location)
 
-        # date selection
-        # calculating both start point and num_output        
-        if args.start_date:           
-            start_output = 0
-            while start_output < len(pressures):
-                if pressures[start_output][1] == args.start_date:
-                    break
-                start_output += 1
-            
-            if not args.end_date:
-                # inclusive, effectively EOF thanks to next line
-                end_date = str(datetime.date.today())
 
-            if not args.num_output:
-                end_date = args.end_date
-                end_row = start_output
-                while end_row < len(pressures):
-                    if pressures[end_row][1] == end_date:
-                        while end_row < len(pressures):
-                            if pressures[end_row][1] != end_date:
-                                break
-                            else:
-                                end_row += 1
-                    end_row += 1
-                num_output = end_row - start_output
-            else:
-                num_output = args.num_output
-                end_row = start_output + num_output
-        else: 
-            # defaults if date is not selected
-            num_output = args.num_output # because there's default
-            start_output = len(pressures) - num_output
-            end_row = len(pressures)
+    print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
+    print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
+    # date selection
+    # calculating both start point and num_output        
+    if args.start_date:           
+        start_output = 0
+        while start_output < len(pressures):
+            if pressures[start_output][1] == args.start_date:
+                break
+            start_output += 1
+        
+        if not args.end_date:
+            # inclusive, effectively EOF thanks to next line
+            end_date = str(datetime.date.today())
 
-        if end_row > len(pressures):
-            end_row = len(pressures)
-            
-        if args.showcalc:
-            show_calculations(num_output)
-            
-        if args.signval:
-            make_chart(start_output,end_row,num_output,args.linegraph,args.scheme)
-            
-        if args.absval:
-            make_abs_chart(start_output,end_row,num_output,args.linegraph,args.scheme)
+        if not args.num_output:
+            end_date = args.end_date
+            end_row = start_output
+            while end_row < len(pressures):
+                if pressures[end_row][1] == end_date:
+                    while end_row < len(pressures):
+                        if pressures[end_row][1] != end_date:
+                            break
+                        else:
+                            end_row += 1
+                end_row += 1
+            num_output = end_row - start_output
+        else:
+            num_output = args.num_output
+            end_row = start_output + num_output
+    else: 
+        if args.num_output: # defaults if date is not selected
+            num_output = args.num_output 
+        else:
+            num_output = 64 # because there's default
+        start_output = len(pressures) - num_output
+        end_row = len(pressures)
 
+    if end_row > len(pressures):
+        end_row = len(pressures)
+        
+    if args.showcalc:
+        show_calculations(start_output,end_row,num_output)
+        
+    if args.signval:
+        make_chart(start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=False,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
+        
+    if args.absval:
+        make_chart(start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=True,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
 
 if __name__ == '__main__':
     main()
 else:
     print("barometers loaded as a module")
+
+
+
+
+
 
