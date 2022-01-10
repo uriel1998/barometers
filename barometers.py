@@ -233,8 +233,8 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                             # fourth dia
                             da_difference = abs((start_time + (my_multiplier * (interval+1))) - int(input_list[count+1][0]))
                             if da_difference < tolerance:
-                                print ("Next record at correct interval; skipping {1}.".format(da_difference2,now_time))
-                                multiplier += 1
+                                print ("Next record at correct interval; skipping {1}.".format(da_difference,now_time))
+                                my_multiplier += 1
                                 rejected += 1
                                 # This one is just wack, but the next one is okay.
                             else:
@@ -258,11 +258,12 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
     return my_times, rejected
 
 
-def data_for_my_graph(start, num_output=64,last = len(pressures)):
+def data_for_my_graph(l_times,start, num_output,last):
     """ Draw the line graph over the chart """
-    global pressures
 
     my_points = []
+
+    
 
     if not start:
         start = last - num_output
@@ -271,9 +272,9 @@ def data_for_my_graph(start, num_output=64,last = len(pressures)):
         count = 0
     else:
         count = start 
- 
+    
     while count < last:
-        my_points.append(int(pressures[count][4]))
+        my_points.append(int(l_times[count][4]))
         count += 1
        
     my_range = max(my_points) - min(my_points)
@@ -307,7 +308,6 @@ def match_cache(weather_location):
 
 def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
     """ Create output graphic chart data """
-    global pressures
     global cur_path
     
     font = ImageFont.truetype("Arial", size=7)
@@ -327,18 +327,27 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
     y = 0
     da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
 
-    # substituting in the check_intervals to give us a list to scroll through instead of pressures
-    da_times, da_rejected = check_intervals(pressures, start, last, num_output, my_interval, my_tolerance)
-    print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
-    if da_rejected > 0:
-        print ("Recalculation needed on this subset; performing now.")
-        da_times = loop_calculations(da_times,True,False)
+    if my_verify == True:
+        # substituting in the check_intervals to give us a list to scroll through instead of pressures
+        da_times, da_rejected = check_intervals(pressures, start, last, num_output, my_interval, my_tolerance)
+        print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
+        if da_rejected > 0:
+            print ("Recalculation needed on this subset; performing now.")
+            da_times = loop_calculations(da_times,True,False)
+            last = len(da_times)
+            if num_output > last:
+                num_output = last
+            start = 0
+            count = 0 # reassigning it since da_times is now the count
+    else:
+        #keeping original values
+        da_times = pressures
 
     print ("Creating chart...")
-    count = 0 # reassigning it since da_times is now the count
-    while count < len(da_times):  # row count    
+    
+    while count < last:  # row count    
         x_counter = 0
-        while x_counter < len(da_times):
+        while x_counter < last:
             if is_abs:
                 if scheme == "wide":
                     fill_color = _my_colors_wide.get(abs(da_times[count][5][x_counter]), (254, 255, 255))
@@ -357,19 +366,17 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
                     fill_color = _my_colors_original.get(da_times[count][5][x_counter], (255, 255, 255))
                 else:
                     fill_color = _my_colors.get(da_times[count][5][x_counter], (255, 255, 255))           
-                
-
             x = (x_counter * 8) + 40
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
-            draw.text((5, y), str(pressures[count][2]), fill="white", font=font)
-            print("{0}".format(count))
+            
+        draw.text((5, y), str(pressures[count][2]), fill="white", font=font)
         count += 1
         y += 8
         
     if linegraph == True:
         print ("Creating line graph...")
-        points, da_max, da_min, da_range = data_for_my_graph(start, num_output, last)
+        points, da_max, da_min, da_range = data_for_my_graph(da_times, start, num_output, last)
         draw.line(points, width=5, fill="green", joint="curve")  
         da_string = "Max: {0} Min: {1} Range: {2}".format(da_max,da_min,da_range) 
         draw.text((100, 45), da_string, fill="white", font=font2, stroke_width=2, stroke_fill="black")

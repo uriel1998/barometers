@@ -163,7 +163,9 @@ A detailed breakdown follows this summary:
 
 ```
 usage: barometers.py [-h] [-d NUM_OUTPUT] [-a NUM_INPUT] [-c] [-l] [-s SCHEME]
-                     [-S] [-A] [-t] [-b START_DATE] [-e END_DATE] [-f FN_STEM]
+                     [-S] [-A] [-b START_DATE] [-e END_DATE] [-f FN_STEM] [-v]
+                     [-i VERIFY_INTERVAL] [-t TOLERANCE_RANGE] [-m]
+                     [-B BOUT_HERE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -185,6 +187,16 @@ optional arguments:
   -f FN_STEM, --file FN_STEM
                         Stem for output filename, defaults to
                         out_[abs|signed].png
+  -v, --verify          Verify interval ranges
+  -i VERIFY_INTERVAL, --interval VERIFY_INTERVAL
+                        Expected interval in seconds, only makes sense with -v
+  -t TOLERANCE_RANGE, --tolerance TOLERANCE_RANGE
+                        Acceptable range in seconds, only makes sense with -v
+  -m, --make-sure       Make sure calculations in range take into account
+                        verified interval ranges.
+  -B BOUT_HERE, --bout-here BOUT_HERE
+                        Where to output weather location from.
+
 ```
 
 ### Controlling addition of data  
@@ -212,6 +224,12 @@ beginning of the start date to the end of the data.
 *  -e END_DATE, --end-date END_DATE = Provide the end date for chart or calculation data in YYYY-mm-dd format; only used with --begin-date.  
 
 ### Controlling the output of data  
+
+#### Location 
+
+`barometers.py` can choose which cached data to output by using this switch:
+
+* -B BOUT_HERE, --bout-here BOUT_HERE = City code of cache to output weather location from.
 
 #### Calculation data  
 
