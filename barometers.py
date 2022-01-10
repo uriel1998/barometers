@@ -90,23 +90,27 @@ def read_in_file(in_file,num_input=256):
                     pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
     linecache.clearcache()
 
+
 def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, tolerance = 120):
     """ Control loop for calculations """
 
     count = 0
     if to_verify == True:
-        input_list, rejected = check_intervals(input_list,0,len(input_list),interval,tolerance)
+        print("{0}".format(len(input_list)))
+        input_list, rejected = check_intervals(input_list,0,len(input_list),len(input_list),interval,tolerance)
         if rejected > 0:  
             print ("{0} rejected times found in selected set.".format(rejected))
             if make_sure_of_calc == False:
                 print ("You *WILL* have erroneous output if you do not use the verify functions.")
     
     if make_sure_of_calc == True:  # delete all the tuples in our current set so they're recalculated
+        print ("Recalculating for selected range...")
         count = 0
         while count < len(input_list):
             if len(input_list[count]) == 6:  
-                del (input_list[count][6])
-    
+                del (input_list[count][5])
+            count += 1
+        
     row = 0 
     while row < len(input_list):
         now = input_list[row][4]  # only need this once
@@ -139,18 +143,16 @@ def show_calculations(start = None, num_output = 64,last = len(pressures)):
         print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
 
-
-def check_intervals(start, last = len(pressures), num_output = 64, interval = 1800, tolerance = 120):
+def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 120):
     """ Ensuring the intervals in the sample are roughly equivalent """
     """ If auto interval, it should have None passed to it, otherwise default of 1800 sec """   
-    global pressures
 
     my_times = []
     rejected = 0
     skipped = 0
     
     if not start:
-        start = last - num_output
+        start = last - int(num_output)
         
     if start < 0:
         count = 0
@@ -158,29 +160,52 @@ def check_intervals(start, last = len(pressures), num_output = 64, interval = 18
         count = start 
  
     if not interval:
-        interval = (int(pressures[count + 1][0]) - int(pressures[count][0]))
+        interval = (int(input_list[count + 1][0]) - int(input_list[count][0]))
+    else:
+        interval = int(interval)
     tolerance = int(tolerance)
     
     my_multiplier = 0
-    start_time = int(pressures[start][0])
+    
+    start_time = int(input_list[start][0])
     while count < last:  
-        now_time = int(pressures[count][0])
+        now_time = int(input_list[count][0])
         
         if my_multiplier > 0:
             da_difference = abs((start_time + (my_multiplier * interval)) - now_time)
             if da_difference > tolerance:
-                print ("Timestamp {0} out of tolerance".format(now_time))
-                rejected += 1
-                da_difference2 = abs((start_time + (my_multiplier * (interval + 1))) - int(pressures[count+1][0]))
-                if da_difference2 > tolerance:
-                    print ("Next record also out of tolerance; erroneous output WILL happen")
+                print ("Timestamp {0} out of tolerance (off by {1})".format(now_time,da_difference))
+                da_difference = abs((start_time + (my_multiplier * interval + 1 )) - now_time)
+                if da_difference < tolerance:
+                    # An interval was missed
+                    # do stuff
+                
+                
                 else: 
-                    print ("Next record at correct interval; skipping.")
+                    if count + 1 < last: 
+                        da_difference = abs((start_time + (my_multiplier * (interval))) - int(input_list[count+1][0]))
+                        if da_difference < tolerance:
+                            # There is an extra reading inbetween
+                            # do stuff
+                        else:
+                            da_difference = abs((start_time + (my_multiplier * (interval+1))) - int(input_list[count+1][0]))
+                            if da_difference < tolerance:
+                                # The next one will be okay
+                                print ("Next record at correct interval; skipping {1}.".format(da_difference2,now_time))
+
+                            else:
+                                # The next one is fucky too, and that's a problem with the dataset then
+                
+                
+                    else:
+                        print ("Last record out of tolerance as well.")
+                        rejected += 1
+                
             else:
-                my_times.append(pressures[count])  # appending that whole row
+                my_times.append(input_list[count])  # appending that whole row
                 my_multiplier += 1
         else:
-            my_times.append(pressures[count])  # is good
+            my_times.append(input_list[count])  # is good
             my_multiplier += 1
 
         count += 1         
@@ -323,6 +348,8 @@ def write_cache(weather_location):
 def main():
     """ main loop """
     
+    global pressures
+    
     parser = argparse.ArgumentParser(usage=__doc__)
     parser.add_argument("-d", "--display-records", type=int, help="number of records back to show", default=None,action='store',dest='num_output')
     parser.add_argument("-a", "--add-records", type=int, help="max number of records to add from input files", default=256,action='store',dest='num_input')
@@ -336,14 +363,14 @@ def main():
     parser.add_argument('-f', '--file', action='store',dest='fn_stem', default="out",help="Stem for output filename, defaults to out_[abs|signed].png")
     parser.add_argument('-v', '--verify', dest='to_verify', action='store_true', default=False,help="Verify interval ranges")
     parser.add_argument('-i', '--interval', action='store',dest='verify_interval', default="1800",help="Expected interval in seconds, only makes sense with -v")
-    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance_range', default="120",help="Acceptable range in seconds, only makes sense with -v")
+    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance_range', default="300",help="Acceptable range in seconds, only makes sense with -v")
     parser.add_argument('-m', '--make-sure', action='store_true', default=False,dest='make_sure_of_calc',help="Make sure calculations in range take into account verified interval ranges.")
-
+    parser.add_argument('-B', '--bout-here', action='store', dest='bout_here',help="Where to output/input weather location from.")
     args = parser.parse_args()
 
     #print ('Media file is ', args.media_fn)
     #print ('Message is ', args.message)    
-
+    
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
         test_stem = str(rawfile.stem).strip()
         
@@ -357,10 +384,17 @@ def main():
         print("Reading in {0}".format(rawfile))
         read_in_file(format(rawfile),args.num_input)
         pressures.sort() # because key 0 is epochtime
+        
         pressures = loop_calculations(pressures,args.make_sure_of_calc,args.to_verify,args.verify_interval,args.tolerance_range)
         write_cache(weather_location)
 
-
+    if args.bout_here is not None:
+        weather_location = args.bout_here
+        match_cache(weather_location)
+        if args.to_verify == True:
+            print ("Checking intervals...")
+            check_intervals(pressures, 0, len(pressures), num_output = len(pressures), interval = 1800, tolerance = 300)
+        
     print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
     print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
     # date selection
