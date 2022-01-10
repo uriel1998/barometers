@@ -173,27 +173,38 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
         
         if my_multiplier > 0:
             da_difference = abs((start_time + (my_multiplier * interval)) - now_time)
-            if da_difference > tolerance:
+            if da_difference > tolerance:  # error in first dia
                 print ("Timestamp {0} out of tolerance (off by {1})".format(now_time,da_difference))
                 da_difference = abs((start_time + (my_multiplier * interval + 1 )) - now_time)
                 if da_difference < tolerance:
-                    # An interval was missed
-                    # do stuff
-                
-                
+                    print ("Missed interval; inserting duplicate of last row sans calculations for placeholder.")
+                    ts = datetime.datetime.fromtimestamp(now_time)
+                    datestring = ts.strftime("%Y-%m-%d")
+                    timestring = ts.strftime("%H:%M")
+                    fakerow = [ int(start_time + ( count * interval )),
+                            input_list[count][0],datestring,timestring,
+                            input_list[count-1][3],input_list[count-1][4] ]
+                    my_times.append(fakerow)  # appending fake row
+                    my_times.append(input_list[count])  # appending current row in next spot
+                    my_multiplier += 1               # incrementing multiplier
+                    # done with second dia
                 else: 
                     if count + 1 < last: 
+                        # third dia
                         da_difference = abs((start_time + (my_multiplier * (interval))) - int(input_list[count+1][0]))
                         if da_difference < tolerance:
-                            # There is an extra reading inbetween
-                            # do stuff
+                            print ("Excess reading detected, next reading is for this interval. Skipping {0}.".format(now_time))
+                            # do not increment multiplier, let count increment and catch up.
                         else:
+                            # fourth dia
                             da_difference = abs((start_time + (my_multiplier * (interval+1))) - int(input_list[count+1][0]))
                             if da_difference < tolerance:
-                                # The next one will be okay
                                 print ("Next record at correct interval; skipping {1}.".format(da_difference2,now_time))
-
+                                multiplier += 1
+                                # This one is just wack, but the next one is okay.
                             else:
+                                print ("Next record is also out of tolerance by {0};".format(da_difference))
+                                print ("Please examine your dataset around {0}.".format(now_time))
                                 # The next one is fucky too, and that's a problem with the dataset then
                 
                 
@@ -205,6 +216,7 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                 my_times.append(input_list[count])  # appending that whole row
                 my_multiplier += 1
         else:
+            # first row is always appended
             my_times.append(input_list[count])  # is good
             my_multiplier += 1
 
