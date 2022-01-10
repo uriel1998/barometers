@@ -108,17 +108,16 @@ def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, t
         count = 0
         while count < len(input_list):
             try:
-                bob=(len(input_list[count]) == 6)
+                bob=len(input_list[count])
             except IndexError:
                 print ("{0} : {1}".format(count,len(input_list)))
             else:
-                del (input_list[count][5])
-                count += 1
-            
-            
-### TODO OH FFS - Because I'm now recalculating only a subset, I need priors 
-### for the FIRST INPUTTED ROWS so that they have calculations
-        
+                if bob == 6:
+                    del (input_list[count][5])
+                    count += 1
+                else:
+                    count += 1
+      
     row = 0 
     while row < len(input_list):
         now = input_list[row][4]  # only need this once
@@ -127,12 +126,11 @@ def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, t
         try:
             bob=(len(input_list[row]) == 6)
         except IndexError:
-            print ("{0} : {1}".format(count,len(input_list)))
+            print ("AA {0} : {1}".format(count,len(input_list)))
         else:
             if len(input_list[row]) == 5:   # no tuple in that row
-                print ("{0}".format(input_list[row]))
-                while count < 64:
-                    then = input_list[int(row) - int(count)][4]
+                while count < len(input_list):
+                    then = input_list[(int(row) - int(count))][4]
                     signed_calc.append(int(now) - int(then))
                     count += 1
 
@@ -329,22 +327,18 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
     y = 0
     da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
 
-
-
-###TODO:  Use this bit with show_calculations to help me narrow this down where it's going wrong...
-###Almost certainly the verify code - perhaps I need to add one more in the addition part??
-
     # substituting in the check_intervals to give us a list to scroll through instead of pressures
     da_times, da_rejected = check_intervals(pressures, start, last, num_output, my_interval, my_tolerance)
     print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
     if da_rejected > 0:
         print ("Recalculation needed on this subset; performing now.")
         da_times = loop_calculations(da_times,True,False)
-        
+
+    print ("Creating chart...")
     count = 0 # reassigning it since da_times is now the count
     while count < len(da_times):  # row count    
         x_counter = 0
-        while x_counter < 64:
+        while x_counter < len(da_times):
             if is_abs:
                 if scheme == "wide":
                     fill_color = _my_colors_wide.get(abs(da_times[count][5][x_counter]), (254, 255, 255))
@@ -369,10 +363,12 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
             draw.text((5, y), str(pressures[count][2]), fill="white", font=font)
+            print("{0}".format(count))
         count += 1
         y += 8
         
     if linegraph == True:
+        print ("Creating line graph...")
         points, da_max, da_min, da_range = data_for_my_graph(start, num_output, last)
         draw.line(points, width=5, fill="green", joint="curve")  
         da_string = "Max: {0} Min: {1} Range: {2}".format(da_max,da_min,da_range) 
