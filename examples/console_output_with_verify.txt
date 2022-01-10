@@ -1,0 +1,227 @@
+Reading in cache for location 4509884
+Reading in /home/steven/documents/programming/barometers/raw/4509884.txt
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1801;
+Please examine your dataset around 1637317802.
+Timestamp 1637317802 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637317802.
+Timestamp 1637319602 out of tolerance (off by 1800)
+Checking for excess readings...
+Next record is also out of tolerance by 1802;
+Please examine your dataset around 1637319602.
+Timestamp 1637319602 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637319602.
+Timestamp 1637321402 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637321402.
+Timestamp 1637323202 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637323202.
+Timestamp 1637325002 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637325002.
+Timestamp 1637326802 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637326802.
+Timestamp 1637328602 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637328602.
+Timestamp 1637330402 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637330402.
+Timestamp 1637332202 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637332202.
+Timestamp 1637334002 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637334002.
+Timestamp 1637335802 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637335802.
+Timestamp 1637337602 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637337602.
+Timestamp 1637339402 out of tolerance (off by 1800)
+Checking for excess readings...
+Excess reading detected, next reading is for this interval. Skipping 1637339402.
+Timestamp 1638009002 out of tolerance (off by -1800)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1638397802 out of tolerance (off by -23400)
+Checking for missing readings...
+Detected 13 missing intervals before recovery.
+Inserting 13 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1638786602 out of tolerance (off by -1800)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1639477801 out of tolerance (off by -1799)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1640169001 out of tolerance (off by -1799)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1640255401 out of tolerance (off by -1799)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1640341802 out of tolerance (off by -1800)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1640514602 out of tolerance (off by -1800)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1640831402 out of tolerance (off by -3600)
+Checking for missing readings...
+Detected 2 missing intervals before recovery.
+Inserting 2 duplicate(s) of last row sans calculations for placeholder(s).
+44 rejected times found in selected set.
+Recalculating for selected range...
+Wrote cache of 2503 records for 4509884.
+Reading in cache for location 4509884
+Checking intervals...
+Timestamp 1637317802 out of tolerance (off by 689400)
+Checking for excess readings...
+Next record is also out of tolerance by 1417;
+Please examine your dataset around 1637317802.
+Timestamp 1638009002 out of tolerance (off by -1800)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1637317802 out of tolerance (off by 1056600)
+Checking for excess readings...
+Next record is also out of tolerance by 1055387;
+Please examine your dataset around 1637317802.
+Timestamp 1637319602 out of tolerance (off by 1054800)
+Checking for excess readings...
+Next record is also out of tolerance by 1053587;
+Please examine your dataset around 1637319602.
+Timestamp 1637321402 out of tolerance (off by 1053000)
+Checking for excess readings...
+Next record is also out of tolerance by 1051787;
+Please examine your dataset around 1637321402.
+Timestamp 1637323202 out of tolerance (off by 1051200)
+Checking for excess readings...
+Next record is also out of tolerance by 1049987;
+Please examine your dataset around 1637323202.
+Timestamp 1637325002 out of tolerance (off by 1049400)
+Checking for excess readings...
+Next record is also out of tolerance by 1048187;
+Please examine your dataset around 1637325002.
+Timestamp 1637326802 out of tolerance (off by 1047600)
+Checking for excess readings...
+Next record is also out of tolerance by 1046387;
+Please examine your dataset around 1637326802.
+Timestamp 1637328602 out of tolerance (off by 1045800)
+Checking for excess readings...
+Next record is also out of tolerance by 1044587;
+Please examine your dataset around 1637328602.
+Timestamp 1637330402 out of tolerance (off by 1044000)
+Checking for excess readings...
+Next record is also out of tolerance by 1042787;
+Please examine your dataset around 1637330402.
+Timestamp 1637332202 out of tolerance (off by 1042200)
+Checking for excess readings...
+Next record is also out of tolerance by 1040987;
+Please examine your dataset around 1637332202.
+Timestamp 1637334002 out of tolerance (off by 1040400)
+Checking for excess readings...
+Next record is also out of tolerance by 1039187;
+Please examine your dataset around 1637334002.
+Timestamp 1637335802 out of tolerance (off by 1038600)
+Checking for excess readings...
+Next record is also out of tolerance by 1037387;
+Please examine your dataset around 1637335802.
+Timestamp 1637337602 out of tolerance (off by 1036800)
+Checking for excess readings...
+Next record is also out of tolerance by 1035587;
+Please examine your dataset around 1637337602.
+Timestamp 1637339402 out of tolerance (off by 1035000)
+Checking for excess readings...
+Next record is also out of tolerance by 22813;
+Please examine your dataset around 1637339402.
+Timestamp 1638397802 out of tolerance (off by -23400)
+Checking for missing readings...
+Detected 13 missing intervals before recovery.
+Inserting 13 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1637317802 out of tolerance (off by 1467000)
+Checking for excess readings...
+Next record is also out of tolerance by 985;
+Please examine your dataset around 1637317802.
+Timestamp 1638786602 out of tolerance (off by -1800)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1637317802 out of tolerance (off by 2158200)
+Checking for excess readings...
+Next record is also out of tolerance by 600;
+Please examine your dataset around 1637317802.
+Timestamp 1639477801 out of tolerance (off by -1799)
+Checking for missing readings...
+Detected 1 missing intervals before recovery.
+Inserting 1 duplicate(s) of last row sans calculations for placeholder(s).
+Timestamp 1637317802 out of tolerance (off by 2849400)
+Checking for excess readings...
+Next record at correct interval; skipping 1637317802.
+Timestamp 1637317802 out of tolerance (off by 2935800)
+Checking for excess readings...
+Next record at correct interval; skipping 1637317802.
+Timestamp 1637317802 out of tolerance (off by 3022200)
+Checking for excess readings...
+Next record at correct interval; skipping 1637317802.
+Timestamp 1637317802 out of tolerance (off by 3195000)
+Checking for excess readings...
+Next record at correct interval; skipping 1637317802.
+Timestamp 1637317802 out of tolerance (off by 3510000)
+Checking for excess readings...
+Next record is also out of tolerance by 3510150;
+Please examine your dataset around 1637317802.
+Timestamp 1637319602 out of tolerance (off by 3508200)
+Checking for excess readings...
+Next record is also out of tolerance by 1650;
+Please examine your dataset around 1637319602.
+Timestamp 1640831402 out of tolerance (off by -3600)
+Checking for missing readings...
+Detected 2 missing intervals before recovery.
+Inserting 2 duplicate(s) of last row sans calculations for placeholder(s).
+We have 2503 records stored for 4509884,
+From 05:21 at 2021-11-19 to 08:25 at 2022-01-10
+64 Accepted : 0 Rejected
+Creating chart...
+Creating line graph...
