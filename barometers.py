@@ -107,22 +107,36 @@ def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, t
         print ("Recalculating for selected range...")
         count = 0
         while count < len(input_list):
-            if len(input_list[count]) == 6:  
+            try:
+                bob=(len(input_list[count]) == 6)
+            except IndexError:
+                print ("{0} : {1}".format(count,len(input_list)))
+            else:
                 del (input_list[count][5])
-            count += 1
+                count += 1
+            
+            
+### TODO OH FFS - Because I'm now recalculating only a subset, I need priors 
+### for the FIRST INPUTTED ROWS so that they have calculations
         
     row = 0 
     while row < len(input_list):
         now = input_list[row][4]  # only need this once
         signed_calc = []  # maybe?
         count = 0
-        if len(input_list[row]) == 5:   # no tuple in that row
-            while count < 64:
-                then = input_list[int(row) - int(count)][4]
-                signed_calc.append(int(now) - int(then))
-                count += 1
+        try:
+            bob=(len(input_list[row]) == 6)
+        except IndexError:
+            print ("{0} : {1}".format(count,len(input_list)))
+        else:
+            if len(input_list[row]) == 5:   # no tuple in that row
+                print ("{0}".format(input_list[row]))
+                while count < 64:
+                    then = input_list[int(row) - int(count)][4]
+                    signed_calc.append(int(now) - int(then))
+                    count += 1
 
-            input_list[row].append(tuple(signed_calc))  #This SHOULD work?
+                input_list[row].append(tuple(signed_calc))  #This SHOULD work?
         row += 1
     
     return input_list
@@ -140,7 +154,7 @@ def show_calculations(start = None, num_output = 64,last = len(pressures)):
         count = start 
 
     while count < len(pressures):
-        print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
+        print ("{0} {1} @ {2} : {3}".format(pressures[count][0],pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
 
 def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 300):
@@ -185,7 +199,6 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                     print ("Checking for missing readings...")
                     subcount = 1
                     while da_difference < 0: 
-                        print ("{0}".format(da_difference))
                         da_difference = (start_time + (my_multiplier + subcount) * interval) - now_time
                         if abs(da_difference) < tolerance:
                             print ("Detected {0} missing intervals before recovery.".format(subcount))
@@ -203,6 +216,7 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                                 subbycount += 1
                             my_times.append(input_list[count])  # appending current row in next spot
                             finished = True
+                            rejected += subbycount
                             my_multiplier += subcount + 1 # incrementing multiplier by subcount
                             # done with second dia
                         subcount += 1    
@@ -215,6 +229,7 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                         da_difference = abs((start_time + (my_multiplier * (interval))) - int(input_list[count+1][0]))
                         if da_difference < tolerance:
                             print ("Excess reading detected, next reading is for this interval. Skipping {0}.".format(now_time))
+                            rejected += 1
                             # do not increment multiplier, let count increment and catch up.
                         else:
                             # fourth dia
@@ -222,12 +237,14 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                             if da_difference < tolerance:
                                 print ("Next record at correct interval; skipping {1}.".format(da_difference2,now_time))
                                 multiplier += 1
+                                rejected += 1
                                 # This one is just wack, but the next one is okay.
                             else:
                                 print ("Next record is also out of tolerance by {0};".format(da_difference))
                                 print ("Please examine your dataset around {0}.".format(now_time))
                                 # The next one is fucky too, and that's a problem with the dataset then
                                 # the multipliers get out of whack here
+                                rejected += 1
                 
                     else:
                         print ("Last record out of tolerance as well.")
@@ -312,11 +329,20 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
     y = 0
     da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
 
+
+
+###TODO:  Use this bit with show_calculations to help me narrow this down where it's going wrong...
+###Almost certainly the verify code - perhaps I need to add one more in the addition part??
+
     # substituting in the check_intervals to give us a list to scroll through instead of pressures
     da_times, da_rejected = check_intervals(pressures, start, last, num_output, my_interval, my_tolerance)
     print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
+    if da_rejected > 0:
+        print ("Recalculation needed on this subset; performing now.")
+        da_times = loop_calculations(da_times,True,False)
+        
     count = 0 # reassigning it since da_times is now the count
-    while count < len(da_times):  # row count        
+    while count < len(da_times):  # row count    
         x_counter = 0
         while x_counter < 64:
             if is_abs:
