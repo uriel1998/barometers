@@ -199,6 +199,26 @@ optional arguments:
 
 ```
 
+### Verification of data
+
+**Important** : For best results, remove all files in `./cache/*` before using 
+the verification functions.
+
+The program can - with the specification of the verification switch - verify that 
+the time between intervals is roughly the same (default tolerance of +- 5 min), 
+detect missing intervals (e.g. from a power outage), and detect excess intervals 
+(e.g. readings 15 minutes apart when you want them 30 minutes apart).  When displaying 
+charts and --verify is on, if erroneous data is found, it will automatically redo 
+the calculations for that section of data and/or shrink the range to omit bad data.
+
+  -v, --verify          Verify interval ranges
+  -i VERIFY_INTERVAL, --interval VERIFY_INTERVAL
+                        Expected interval in seconds, only makes sense with -v
+  -t TOLERANCE_RANGE, --tolerance TOLERANCE_RANGE
+                        Acceptable range in seconds, only makes sense with -v
+  -m, --make-sure       Make sure calculations in range take into account
+                        verified interval ranges.
+
 ### Controlling addition of data  
 
 By default, it only reads in the last 256 rows of data from each file in the `raw` 
