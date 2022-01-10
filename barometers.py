@@ -91,7 +91,7 @@ def read_in_file(in_file,num_input=256):
     linecache.clearcache()
 
 
-def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, tolerance = 120):
+def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, tolerance = 300):
     """ Control loop for calculations """
 
     count = 0
@@ -143,7 +143,7 @@ def show_calculations(start = None, num_output = 64,last = len(pressures)):
         print ("{0} @ {1} : {2}".format(pressures[count][1],pressures[count][2],pressures[count][5]))
         count += 1
 
-def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 120):
+def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 300):
     """ Ensuring the intervals in the sample are roughly equivalent """
     """ If auto interval, it should have None passed to it, otherwise default of 1800 sec """   
 
@@ -206,7 +206,7 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                                 print ("Next record is also out of tolerance by {0};".format(da_difference))
                                 print ("Please examine your dataset around {0}.".format(now_time))
                                 # The next one is fucky too, and that's a problem with the dataset then
-                
+                                # the multipliers get out of whack here
                 
                     else:
                         print ("Last record out of tolerance as well.")
@@ -271,7 +271,7 @@ def match_cache(weather_location):
     except FileNotFoundError:
         print("No cache exists for location {0}".format(cache_file))   
 
-def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 120):
+def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
     """ Create output graphic chart data """
     global pressures
     global cur_path
@@ -294,7 +294,7 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
     da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
     
     # substituting in the check_intervals to give us a list to scroll through instead of pressures
-    da_times, da_rejected = check_intervals(start, last, num_output, None, 120)
+    da_times, da_rejected = check_intervals(start, last, num_output, None, my_tolerance)
     print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
     count = 0 # reassigning it since da_times is now the count
     while count < len(da_times):  # row count        
@@ -399,13 +399,14 @@ def main():
         
         pressures = loop_calculations(pressures,args.make_sure_of_calc,args.to_verify,args.verify_interval,args.tolerance_range)
         write_cache(weather_location)
+        print ("Wrote cache of {0} records for {1}.".format(len(pressures),weather_location))
 
     if args.bout_here is not None:
         weather_location = args.bout_here
         match_cache(weather_location)
         if args.to_verify == True:
             print ("Checking intervals...")
-            check_intervals(pressures, 0, len(pressures), num_output = len(pressures), interval = 1800, tolerance = 300)
+            check_intervals(pressures, 0, len(pressures), num_output = len(pressures), interval = args.verify_interval, tolerance = args.tolerance_range)
         
     print ("We have {0} records stored for {1},".format(len(pressures),weather_location))
     print ("From {0} at {1} to {2} at {3}".format(pressures[0][2],pressures[0][1],pressures[len(pressures)-1][2],pressures[len(pressures)-1][1]))
