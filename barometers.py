@@ -90,27 +90,38 @@ def read_in_file(in_file,num_input=256):
                     pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
     linecache.clearcache()
 
-def perform_calculations(row):
-    """ Calculate the values for calc_signed for the specified row in pressures array """
-    global pressures
-    now = pressures[row][4]  # only need this once
-    signed_calc = []  # maybe?
-    count = 0
-    if len(pressures[row]) == 5:   # no tuple in that row
-        while count < 64:
-            then = pressures[int(row) - int(count)][4]
-            signed_calc.append(int(now) - int(then))
-            count += 1
-
-        pressures[row].append(tuple(signed_calc))  #This SHOULD work?
-    
-def loop_calculations():
+def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, tolerance = 120):
     """ Control loop for calculations """
-    global pressures
+
     count = 0
-    while count < len(pressures):
-        perform_calculations(count)
-        count += 1
+    if to_verify == True:
+        input_list, rejected = check_intervals(input_list,0,len(input_list),interval,tolerance)
+        if rejected > 0:  
+            print ("{0} rejected times found in selected set.".format(rejected))
+            if make_sure_of_calc == False:
+                print ("You *WILL* have erroneous output if you do not use the verify functions.")
+    
+    if make_sure_of_calc == True:  # delete all the tuples in our current set so they're recalculated
+        count = 0
+        while count < len(input_list):
+            if len(input_list[count]) == 6:  
+                del (input_list[count][6])
+    
+    row = 0 
+    while row < len(input_list):
+        now = input_list[row][4]  # only need this once
+        signed_calc = []  # maybe?
+        count = 0
+        if len(input_list[row]) == 5:   # no tuple in that row
+            while count < 64:
+                then = input_list[int(row) - int(count)][4]
+                signed_calc.append(int(now) - int(then))
+                count += 1
+
+            input_list[row].append(tuple(signed_calc))  #This SHOULD work?
+        row += 1
+    
+    return input_list
 
 def show_calculations(start = None, num_output = 64,last = len(pressures)):
     """ Display the tuples for the requested number of intervals back """
@@ -326,6 +337,8 @@ def main():
     parser.add_argument('-v', '--verify', dest='to_verify', action='store_true', default=False,help="Verify interval ranges")
     parser.add_argument('-i', '--interval', action='store',dest='verify_interval', default="1800",help="Expected interval in seconds, only makes sense with -v")
     parser.add_argument('-t', '--tolerance', action='store',dest='tolerance_range', default="120",help="Acceptable range in seconds, only makes sense with -v")
+    parser.add_argument('-m', '--make-sure', action='store_true', default=False,dest='make_sure_of_calc',help="Make sure calculations in range take into account verified interval ranges.")
+
     args = parser.parse_args()
 
     #print ('Media file is ', args.media_fn)
@@ -344,7 +357,7 @@ def main():
         print("Reading in {0}".format(rawfile))
         read_in_file(format(rawfile),args.num_input)
         pressures.sort() # because key 0 is epochtime
-        loop_calculations()
+        pressures = loop_calculations(pressures,args.make_sure_of_calc,args.to_verify,args.verify_interval,args.tolerance_range)
         write_cache(weather_location)
 
 
