@@ -218,6 +218,9 @@ the calculations for that section of data and/or shrink the range to omit bad da
                         Acceptable range in seconds, only makes sense with -v
   -m, --make-sure       Make sure calculations in range take into account
                         verified interval ranges.
+                        
+You may get a *lot* of extra screen output with verify on - see 
+`console_output_with_verify.txt` in the `examples` directory.
 
 ### Controlling addition of data  
 

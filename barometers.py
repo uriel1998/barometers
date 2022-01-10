@@ -96,7 +96,6 @@ def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, t
 
     count = 0
     if to_verify == True:
-        print("{0}".format(len(input_list)))
         input_list, rejected = check_intervals(input_list,0,len(input_list),len(input_list),interval,tolerance)
         if rejected > 0:  
             print ("{0} rejected times found in selected set.".format(rejected))
@@ -263,8 +262,10 @@ def data_for_my_graph(l_times,start, num_output,last):
 
     my_points = []
 
+    if last > len(l_times):
+        start = 0
+        last = len(l_times)
     
-
     if not start:
         start = last - num_output
         
@@ -334,20 +335,26 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
         if da_rejected > 0:
             print ("Recalculation needed on this subset; performing now.")
             da_times = loop_calculations(da_times,True,False)
-            last = len(da_times)
-            if num_output > last:
-                num_output = last
-            start = 0
-            count = 0 # reassigning it since da_times is now the count
+
+        last = len(da_times)
+        if num_output > last:
+            num_output = last
+        if num_output < last:
+            last = num_output
+        start = 0
+        count = 0 # reassigning it since da_times is now the count            
+
     else:
         #keeping original values
         da_times = pressures
+        count = last - num_output
 
     print ("Creating chart...")
-    
-    while count < last:  # row count    
+    while count < num_output:  # row count    
         x_counter = 0
-        while x_counter < last:
+        
+        while x_counter < num_output:
+            
             if is_abs:
                 if scheme == "wide":
                     fill_color = _my_colors_wide.get(abs(da_times[count][5][x_counter]), (254, 255, 255))
@@ -376,6 +383,7 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
         
     if linegraph == True:
         print ("Creating line graph...")
+        
         points, da_max, da_min, da_range = data_for_my_graph(da_times, start, num_output, last)
         draw.line(points, width=5, fill="green", joint="curve")  
         da_string = "Max: {0} Min: {1} Range: {2}".format(da_max,da_min,da_range) 
