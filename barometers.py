@@ -172,25 +172,46 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
         now_time = int(input_list[count][0])
         
         if my_multiplier > 0:
-            da_difference = abs((start_time + (my_multiplier * interval)) - now_time)
-            if da_difference > tolerance:  # error in first dia
-                print ("Timestamp {0} out of tolerance (off by {1})".format(now_time,da_difference))
-                da_difference = abs((start_time + (my_multiplier * interval + 1 )) - now_time)
-                if da_difference < tolerance:
-                    print ("Missed interval; inserting duplicate of last row sans calculations for placeholder.")
-                    ts = datetime.datetime.fromtimestamp(now_time)
-                    datestring = ts.strftime("%Y-%m-%d")
-                    timestring = ts.strftime("%H:%M")
-                    fakerow = [ int(start_time + ( count * interval )),
-                            input_list[count][0],datestring,timestring,
-                            input_list[count-1][3],input_list[count-1][4] ]
-                    my_times.append(fakerow)  # appending fake row
-                    my_times.append(input_list[count])  # appending current row in next spot
-                    my_multiplier += 1               # incrementing multiplier
-                    # done with second dia
-                else: 
+            # first one always goes through
+            finished = False
+            da_difference = (start_time + (my_multiplier * interval)) - now_time
+            if abs(da_difference) < tolerance:  
+                my_times.append(input_list[count])  # appending that whole row
+                my_multiplier += 1
+                finished = True
+            else:
+                print ("Timestamp {0} out of tolerance (off by {1})".format(now_time,da_difference))               
+                if da_difference < 0: # looking for missed readings
+                    print ("Checking for missing readings...")
+                    subcount = 1
+                    while da_difference < 0: 
+                        print ("{0}".format(da_difference))
+                        da_difference = (start_time + (my_multiplier + subcount) * interval) - now_time
+                        if abs(da_difference) < tolerance:
+                            print ("Detected {0} missing intervals before recovery.".format(subcount))
+                            print ("Inserting {0} duplicate(s) of last row sans calculations for placeholder(s).".format(subcount))
+                            subbycount = 0
+                            while subbycount < subcount:
+                                ts = datetime.datetime.fromtimestamp(now_time + (subbycount * interval))
+                                datestring = ts.strftime("%Y-%m-%d")
+                                timestring = ts.strftime("%H:%M")
+                                
+                                fakerow = [ str(start_time + (subbycount * interval)),
+                                        datestring,timestring,
+                                        input_list[count-1][3],input_list[count-1][4] ]
+                                my_times.append(fakerow)  
+                                subbycount += 1
+                            my_times.append(input_list[count])  # appending current row in next spot
+                            finished = True
+                            my_multiplier += subcount + 1 # incrementing multiplier by subcount
+                            # done with second dia
+                        subcount += 1    
+                            
+                            
+                if finished == False:
+                    # this should be a loop tooooooooo
                     if count + 1 < last: 
-                        # third dia
+                        print ("Checking for excess readings...") # third dia
                         da_difference = abs((start_time + (my_multiplier * (interval))) - int(input_list[count+1][0]))
                         if da_difference < tolerance:
                             print ("Excess reading detected, next reading is for this interval. Skipping {0}.".format(now_time))
@@ -212,9 +233,7 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                         print ("Last record out of tolerance as well.")
                         rejected += 1
                 
-            else:
-                my_times.append(input_list[count])  # appending that whole row
-                my_multiplier += 1
+            
         else:
             # first row is always appended
             my_times.append(input_list[count])  # is good
@@ -292,9 +311,9 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
     count = last - num_output
     y = 0
     da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
-    
+
     # substituting in the check_intervals to give us a list to scroll through instead of pressures
-    da_times, da_rejected = check_intervals(start, last, num_output, None, my_tolerance)
+    da_times, da_rejected = check_intervals(pressures, start, last, num_output, my_interval, my_tolerance)
     print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
     count = 0 # reassigning it since da_times is now the count
     while count < len(da_times):  # row count        
