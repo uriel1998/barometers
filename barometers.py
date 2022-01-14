@@ -69,6 +69,7 @@ def walking_calcs(input_list,make_sure_of_calc,to_verify, interval = 1800, toler
         walking_list[row].append(tuple(walking_values)) 
         row += 1
     
+    make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
 #    just go into make chart
 
 
@@ -338,7 +339,7 @@ def match_cache(weather_location):
     except FileNotFoundError:
         print("No cache exists for location {0}".format(cache_file))   
 
-def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
+def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
     """ Create output graphic chart data """
     global cur_path
     
@@ -357,11 +358,11 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
         count = start 
     count = last - num_output
     y = 0
-    da_duration = "From: {0} @ {1} until {2} @ {3}".format(pressures[start][1],pressures[start][2],pressures[last-1][1],pressures[last-1][2])
+    da_duration = "From: {0} @ {1} until {2} @ {3}".format(in_list[start][1],in_list[start][2],in_list[last-1][1],in_list[last-1][2])
 
     if my_verify == True:
-        # substituting in the check_intervals to give us a list to scroll through instead of pressures
-        da_times, da_rejected = check_intervals(pressures, start, last, num_output, my_interval, my_tolerance)
+        # substituting in the check_intervals to give us a list to scroll through instead of in_list
+        da_times, da_rejected = check_intervals(in_list, start, last, num_output, my_interval, my_tolerance)
         print ("{0} Accepted : {1} Rejected".format(len(da_times),da_rejected))
         if da_rejected > 0:
             print ("Recalculation needed on this subset; performing now.")
@@ -377,7 +378,7 @@ def make_chart(start, last = len(pressures), num_output = 64,linegraph = False,s
 
     else:
         #keeping original values
-        da_times = pressures
+        da_times = in_list
         count = last - num_output
 
     print ("Creating chart...")
