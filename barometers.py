@@ -40,6 +40,37 @@ _my_colors_original = { 18:(96, 0, 0),-18:(96, 0, 0), 17:(96, 12, 0), -17:(96, 2
 
 _my_colors_wide = {-24:(192, 0, 0), -23:(192, 24, 0), -22:(192, 48, 0), -21:(192, 72, 0), -20:(192, 96, 0), -19:(192, 120, 0), -18:(192, 144, 0), -17:(192, 168, 0), -16:(192, 192, 0), -15:(168, 192, 0), -14:(144, 192, 0), -13:(120, 192, 0), -12:(96, 192, 0), -11:(72, 192, 0), -10:(48, 192, 0), -9:(24, 192, 0), -8:(0, 192, 0), -7:(0, 192, 24), -6:(0, 192, 48), -5:(0, 192, 72), -4:(0, 192, 96), -3:(0, 192, 120), -2:(0, 192, 144), -1:(0, 192, 168), 0:(0, 192, 192), 1:(0, 168, 192), 2:(0, 144, 192), 3:(0, 120, 192), 4:(0, 96, 192), 5:(0, 72, 192), 6:(0, 48, 192), 7:(0, 24, 192), 8:(0, 0, 192), 9:(24, 0, 192), 10:(48, 0, 192), 11:(72, 0, 192), 12:(96, 0, 192), 13:(120, 0, 192), 14:(144, 0, 192), 15:(168, 0, 192), 16:(192, 0, 192), 17:(192, 0, 168), 18:(192, 0, 144), 19:(192, 0, 120), 20:(192, 0, 96), 21:(192, 0, 72), 22:(192, 0, 48), 23:(192, 0, 24), 24:(192, 0, 0)}
 
+_my_colors_superwide = {53:(255, 255, 0), 52:(224, 224, 0), 51:(192, 192, 0), 50:(160, 160, 0), 49:(128, 128, 0), 48:(96, 96, 0), 47:(64, 64, 0), 46:(32, 32, 0), 45:(0, 0, 0), 44:(255, 0, 0), 43:(224, 0, 0), 42:(192, 0, 0), 41:(160, 0, 0), 40:(128, 0, 0), 39:(96, 0, 0), 38:(64, 0, 0), 37:(32, 0, 0), 36:(0, 0, 0), 35:(255, 0, 255), 34:(224, 0, 224), 33:(192, 0, 192), 32:(160, 0, 160), 31:(128, 0, 128), 30:(96, 0, 96), 29:(64, 0, 64), 28:(32, 0, 32), 27:(0, 0, 0), 26:(0, 255, 0), 25:(0, 224, 0), 24:(0, 192, 0), 23:(0, 160, 0), 22:(0, 128, 0), 21:(0, 96, 0), 20:(0, 64, 0), 19:(0, 32, 0), 18:(0, 0, 0), 17:(0, 255, 255), 16:(0, 224, 224), 15:(0, 192, 192), 14:(0, 160, 160), 13:(0, 128, 128), 12:(0, 96, 96), 11:(0, 64, 64), 10:(0, 32, 32), 9:(0, 0, 0), 8:(0, 0, 255), 7:(0, 0, 224), 6:(0, 0, 192), 5:(0, 0, 160), 4:(0, 0, 128), 3:(0, 0, 96), 2:(0, 0, 64), 1:(0, 0, 32), 0:(0, 0, 0)}
+
+# walking calcs
+# get the existing tuple
+# convert to a list  sue=list(bob)
+# remove the tuple from walking_list
+# use slice notation and a loop to fill with new values  newval=  max(sue[:COUNT]) - min (sue[:COUNT])  
+# That will (maybe) make troughs, etc, look even more accentuated
+# Maybe additionally have a modifier for length of time as well? walk / time ?
+# will need different color scheme with EVEN WIDER variations
+# should (I HOPE) be able to use same chart making function
+
+def walking_calcs(input_list,make_sure_of_calc,to_verify, interval = 1800, tolerance = 300):
+    """ Yet another way of calculating stuff; verifies and recalcs from raw data each time """
+
+    walking_list = loop_calculations(input_list,True,True,interval,tolerance)
+    while row < len(walking_list):
+        work_local=list(walking_list[row][5])
+        del (walking_list[row][5])
+        walking_values = []
+        while count < len(work_local):
+            # this is where possible length modifier would go
+            newval = max(work_local[:count]) - min(work_local[:count])
+            walking_values.append(int(newval))
+            count += 1
+
+        walking_list[row].append(tuple(walking_values)) 
+        row += 1
+    
+#    just go into make chart
+
 
 
 def read_in_file(in_file,num_input=256):
