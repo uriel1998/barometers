@@ -68,9 +68,9 @@ def walking_calcs(input_list,make_sure_of_calc,to_verify, interval = 1800, toler
 
         walking_list[row].append(tuple(walking_values)) 
         row += 1
-    
-    make_chart(start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
-#    just go into make chart
+    #    just go into make chart    
+    make_chart(walking_list,0,len(walking_list),len(walking_list),linegraph = True,scheme = superwide,is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300):
+
 
 
 
@@ -541,10 +541,10 @@ def main():
         show_calculations(start_output,end_row,num_output)
         
     if args.signval:
-        make_chart(start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=False,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
+        make_chart(pressures,start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=False,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
         
     if args.absval:
-        make_chart(start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=True,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
+        make_chart(pressures,start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=True,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
 
 if __name__ == '__main__':
     main()
