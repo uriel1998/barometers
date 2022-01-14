@@ -326,7 +326,7 @@ graph and legend, named `bar_signed.png` in the current directory:
 
 * Document range as calculation
 * figure out what to do with walkabout
-* Auto backoff of color scales?
+* Auto backoff of color scales? - DONE - writeup
 * interval markers at 6, 12, etc on chart (use modulo for that 
 for row in rows:
     if n % 25:
@@ -335,7 +335,9 @@ for row in rows:
         row.STATUS = "Major"
 * output "load" numbers
 * Package in open source font, make the default font that.
-* Note in time when duplicate added for padding
+* Note in time when duplicate added for padding - in progress
+* make verification the default to cut down on variables?
+* ? remove short variables? Just too many options, really. Or make more numeric
 * Rewrite `just_pressure` to be part of the python program and be simpler to set up.  
 * Check intervals for (roughly) equivalent time passage when displaying - done, write into README
 * Check intervals for (roughly) equivalent time passage ON CALCULATIONS (there is no checking now)  
