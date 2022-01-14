@@ -75,7 +75,7 @@ def walking_calcs(input_list, interval = 1800, tolerance = 300, walkabout = Fals
         walking_list[row].append(tuple(walking_values)) 
         row += 1
     
-    make_chart(walking_list,0,len(walking_list)-1,len(walking_list)-1,linegraph = True,scheme ="original",is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300)
+    make_chart(walking_list,0,len(walking_list)-1,len(walking_list)-1,linegraph = True,scheme ="auto",is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300)
 
 
 
