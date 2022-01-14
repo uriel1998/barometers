@@ -361,9 +361,8 @@ def get_range(in_list,position_in_list):
             my_points.append(int(max(in_list[count][position_in_list]) - min(in_list[count][position_in_list])))
             my_points2.append(abs(int(max(in_list[count][position_in_list]) - min(in_list[count][position_in_list]))))
         count += 1
-       
     my_range = max(my_points) - min(my_points)
-    my_abs_range = max(my_points2) - min(my_points2)
+    my_abs_range = abs(max(my_points2) - min(my_points2))
     return my_range,my_abs_range
 
 
@@ -410,17 +409,23 @@ def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph =
         count = last - num_output
     
     if scheme == "auto":  # 
-        a_range, a_abs_range = get_range(da_times[count:last],5)
         
+        a_range, a_abs_range = get_range(da_times[count:last],4)
+        print ("{0} : {1}".format(a_range,a_abs_range))
         if a_range < 12 and a_abs_range < 24:
+            print("1")
             scheme = "autoscale1"
         elif a_range < 18 and a_abs_range < 36:
+            print("2")
             scheme = "autoscale2"           
         elif a_range < 24 and a_abs_range < 48:            
+            print("3")
             scheme = "autoscale3"
         elif a_range < 36 and a_abs_range < 72:
+            print("4")
             scheme = "autoscale4"           
         elif a_range < 48 and a_abs_range < 96:
+            print("5")
             scheme = "autoscale5"
 
     print ("Creating chart...")
