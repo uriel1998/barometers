@@ -324,8 +324,15 @@ graph and legend, named `bar_signed.png` in the current directory:
 
 ## 7. ToDo
 
-* What about *RANGE* as calculation?
-* interval markers at 6, 12, etc on chart
+* Document range as calculation
+* figure out what to do with walkabout
+* Auto backoff of color scales?
+* interval markers at 6, 12, etc on chart (use modulo for that 
+for row in rows:
+    if n % 25:
+        row.STATUS = "Minor"
+    else:
+        row.STATUS = "Major"
 * output "load" numbers
 * Package in open source font, make the default font that.
 * Note in time when duplicate added for padding
