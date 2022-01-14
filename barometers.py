@@ -141,7 +141,7 @@ def loop_calculations(input_list,make_sure_of_calc,to_verify, interval = 1800, t
                 print ("You *WILL* have erroneous output if you do not use the verify functions.")
     
     if make_sure_of_calc == True:  # delete all the tuples in our current set so they're recalculated
-        print ("Recalculating for selected range...")
+        print ("Forcing recalculation for selected range...")
         count = 0
         while count < len(input_list):
             try:
@@ -243,7 +243,7 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                                 ts = datetime.datetime.fromtimestamp(now_time + (subbycount * interval))
                                 datestring = ts.strftime("%Y-%m-%d")
                                 timestring = ts.strftime("%H:%M")
-                                
+                                # TODO: Mark that it's added here
                                 fakerow = [ str(start_time + (subbycount * interval)),
                                         datestring,timestring,
                                         input_list[count-1][3],input_list[count-1][4] ]
@@ -264,6 +264,9 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                         da_difference = abs((start_time + (my_multiplier * (interval))) - int(input_list[count+1][0]))
                         if da_difference < tolerance:
                             print ("Excess reading detected, next reading is for this interval. Skipping {0}.".format(now_time))
+                            # # TODO: Mark skips here; as is, it means it matches when re-adding data and saves it to cache
+                            #timestring = input_list[count+1][2] + "^^--" 
+                            #input_list[count+1][2] = timestring
                             rejected += 1
                             # do not increment multiplier, let count increment and catch up.
                         else:
@@ -273,10 +276,14 @@ def check_intervals(input_list, start, last, num_output = 64, interval = 1800, t
                                 print ("Next record at correct interval; skipping {1}.".format(da_difference,now_time))
                                 my_multiplier += 1
                                 rejected += 1
+                                # # TODO: Mark skips here; as is, it means it matches when re-adding data and saves it to cache
+                                #timestring = input_list[count+1][2] + "^^--" 
+                                #input_list[count+1][2] = timestring
                                 # This one is just wack, but the next one is okay.
                             else:
                                 print ("Next record is also out of tolerance by {0};".format(da_difference))
                                 print ("Please examine your dataset around {0}.".format(now_time))
+                                # Not adding to the timestring, because the next one won't be used either...
                                 # The next one is fucky too, and that's a problem with the dataset then
                                 # the multipliers get out of whack here
                                 rejected += 1
@@ -366,7 +373,7 @@ def get_range(in_list,position_in_list):
     return my_range,my_abs_range
 
 
-def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
+def make_chart(in_list,start, last, num_output,linegraph = False,scheme = None,is_abs = None,stem = "out", my_verify = False, my_interval = 1800, my_tolerance = 300):
     """ Create output graphic chart data """
     global cur_path
     
@@ -375,6 +382,9 @@ def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph =
     my_image = Image.new('RGB', (552, (num_output * 8)), (125, 125, 125))
     draw = ImageDraw.Draw(my_image)
     
+    if not num_output:
+        num_output = 64
+        
     if not start:
         start = last - num_output
         
@@ -409,23 +419,16 @@ def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph =
         count = last - num_output
     
     if scheme == "auto":  # 
-        
         a_range, a_abs_range = get_range(da_times[count:last],4)
-        print ("{0} : {1}".format(a_range,a_abs_range))
         if a_range < 12 and a_abs_range < 24:
-            print("1")
             scheme = "autoscale1"
         elif a_range < 18 and a_abs_range < 36:
-            print("2")
             scheme = "autoscale2"           
         elif a_range < 24 and a_abs_range < 48:            
-            print("3")
             scheme = "autoscale3"
         elif a_range < 36 and a_abs_range < 72:
-            print("4")
             scheme = "autoscale4"           
         elif a_range < 48 and a_abs_range < 96:
-            print("5")
             scheme = "autoscale5"
 
     print ("Creating chart...")
