@@ -62,7 +62,7 @@ def walking_calcs(input_list, interval = 1800, tolerance = 300, walkabout = Fals
         work_local=list(walking_list[row][5])
         del (walking_list[row][5])
         walking_values = []
-        count = 0 
+        count = 1 
         while count < len(work_local):
             # this is where possible length modifier would go
             if walkabout == False:
@@ -75,8 +75,8 @@ def walking_calcs(input_list, interval = 1800, tolerance = 300, walkabout = Fals
 
         walking_list[row].append(tuple(walking_values)) 
         row += 1
-    #    just go into make chart    
-    make_chart(walking_list,0,len(walking_list),len(walking_list),linegraph = True,scheme = superwide,is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300)
+    
+    make_chart(walking_list,0,len(walking_list)-1,len(walking_list)-1,linegraph = True,scheme ="original",is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300)
 
 
 
@@ -406,6 +406,8 @@ def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph =
             else:
                 if scheme == "wide":
                     fill_color = _my_colors_wide.get(da_times[count][5][x_counter], (254, 255, 255))
+                elif scheme == "superwide":
+                    fill_color = _my_colors_superwide.get(da_times[count][5][x_counter], (255, 255, 255))
                 elif scheme == "alt":
                     fill_color = _my_colors_alt.get(da_times[count][5][x_counter], (255, 255, 255))
                 elif scheme == "original":
