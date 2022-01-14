@@ -346,14 +346,20 @@ def match_cache(weather_location):
         print("No cache exists for location {0}".format(cache_file))   
 
 
-def get_range(in_list,position_in_list)
-    """ Obtaining range of points in list within list """
+def get_range(in_list,position_in_list):
+    """ Obtaining range of points in list/set/tuple within list """
+    """ Will choke on single variable """
     my_points = []
     my_points2 = []
+    count = 0 
 
-    while count < last:
-        my_points.append(int(l_times[count][position_in_list]))
-        my_points2.append(abs(int(l_times[count][position_in_list])))
+    while count < len(in_list):
+        if type(in_list[count][position_in_list]) is int or type(in_list[count][position_in_list]) is str:
+            my_points.append(int(in_list[count][position_in_list]))
+            my_points2.append(abs(int(in_list[count][position_in_list])))
+        elif type(in_list[count][position_in_list]) is list or type(in_list[count][position_in_list]) is tuple:
+            my_points.append(int(max(in_list[count][position_in_list]) - min(in_list[count][position_in_list])))
+            my_points2.append(abs(int(max(in_list[count][position_in_list]) - min(in_list[count][position_in_list]))))
         count += 1
        
     my_range = max(my_points) - min(my_points)
@@ -425,7 +431,7 @@ def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph =
             this_value = 0
             if is_abs:
                 this_value = abs(da_times[count][5][x_counter])
-            else
+            else:
                 this_value = da_times[count][5][x_counter]
 
             if scheme == "wide":
