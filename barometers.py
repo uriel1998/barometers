@@ -51,25 +51,32 @@ _my_colors_superwide = {53:(255, 255, 0), 52:(224, 224, 0), 51:(192, 192, 0), 50
 # Maybe additionally have a modifier for length of time as well? walk / time ?
 # will need different color scheme with EVEN WIDER variations
 # should (I HOPE) be able to use same chart making function
+# need to add arg so it does this
 
-def walking_calcs(input_list,make_sure_of_calc,to_verify, interval = 1800, tolerance = 300):
+def walking_calcs(input_list, interval = 1800, tolerance = 300, walkabout = False):
     """ Yet another way of calculating stuff; verifies and recalcs from raw data each time """
 
     walking_list = loop_calculations(input_list,True,True,interval,tolerance)
+    row = 0
     while row < len(walking_list):
         work_local=list(walking_list[row][5])
         del (walking_list[row][5])
         walking_values = []
+        count = 0 
         while count < len(work_local):
             # this is where possible length modifier would go
-            newval = max(work_local[:count]) - min(work_local[:count])
+            if walkabout == False:
+                newval = max(work_local[:count]) - min(work_local[:count])
+            else:
+                newval = max(work_local[:count]) - min(work_local[:count])  # Figure out what I want here later
+                
             walking_values.append(int(newval))
             count += 1
 
         walking_list[row].append(tuple(walking_values)) 
         row += 1
     #    just go into make chart    
-    make_chart(walking_list,0,len(walking_list),len(walking_list),linegraph = True,scheme = superwide,is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300):
+    make_chart(walking_list,0,len(walking_list),len(walking_list),linegraph = True,scheme = superwide,is_abs = None,stem = "walking", my_verify = False, my_interval = 1800, my_tolerance = 300)
 
 
 
@@ -466,7 +473,10 @@ def main():
     parser.add_argument('-t', '--tolerance', action='store',dest='tolerance_range', default="300",help="Acceptable range in seconds, only makes sense with -v")
     parser.add_argument('-m', '--make-sure', action='store_true', default=False,dest='make_sure_of_calc',help="Make sure calculations in range take into account verified interval ranges.")
     parser.add_argument('-B', '--bout-here', action='store', dest='bout_here',help="Where to output/input weather location from.")
+    parser.add_argument("-w", "--walking", dest="walking",action='store_true', default=False, help="Produce walking value chart")
+    parser.add_argument("-W", "--walk_about", dest="walkabout",action='store_true', default=False, help="Modify walking chart by distance from present")
     args = parser.parse_args()
+    
 
     #print ('Media file is ', args.media_fn)
     #print ('Message is ', args.message)    
@@ -539,6 +549,9 @@ def main():
         
     if args.showcalc:
         show_calculations(start_output,end_row,num_output)
+
+    if args.walking: # always verifies and makes line graph as well
+        walking_calcs(pressures[start_output:end_row],args.verify_interval,args.tolerance_range,args.walkabout)        
         
     if args.signval:
         make_chart(pressures,start_output,end_row,num_output,args.linegraph,args.scheme,is_abs=False,stem=args.fn_stem,my_verify=args.to_verify,my_interval=args.verify_interval,my_tolerance=args.tolerance_range)
