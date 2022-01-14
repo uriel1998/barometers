@@ -404,37 +404,50 @@ def make_chart(in_list,start, last = len(pressures), num_output = 64,linegraph =
         count = last - num_output
     
     if scheme == "auto":  # 
-        a_range, a_abs_range = get_range(da_times[count:last],4)
+        a_range, a_abs_range = get_range(da_times[count:last],5)
         
-        if 
-
+        if a_range < 12 and a_abs_range < 24:
+            scheme = "autoscale1"
+        elif a_range < 18 and a_abs_range < 36:
+            scheme = "autoscale2"           
+        elif a_range < 24 and a_abs_range < 48:            
+            scheme = "autoscale3"
+        elif a_range < 36 and a_abs_range < 72:
+            scheme = "autoscale4"           
+        elif a_range < 48 and a_abs_range < 96:
+            scheme = "autoscale5"
 
     print ("Creating chart...")
     while count < num_output:  # row count    
         x_counter = 0
         
         while x_counter < num_output:
-            
+            this_value = 0
             if is_abs:
-                if scheme == "wide":
-                    fill_color = _my_colors_wide.get(abs(da_times[count][5][x_counter]), (254, 255, 255))
-                elif scheme == "alt":
-                    fill_color = _my_colors_alt.get(abs(da_times[count][5][x_counter]), (255, 255, 255))
-                elif scheme == "original":
-                    fill_color = _my_colors_original.get(abs(da_times[count][5][x_counter]), (255, 255, 255))
-                else:
-                    fill_color = _my_colors.get(1-(abs(da_times[count][5][x_counter])), (255, 255, 255))           
+                this_value = abs(da_times[count][5][x_counter])
+            else
+                this_value = da_times[count][5][x_counter]
+
+            if scheme == "wide":
+                fill_color = _my_colors_wide.get(this_value, (254, 255, 255))
+            elif scheme == "superwide":
+                fill_color = _my_colors_superwide.get(this_value, (255, 255, 255))
+            elif scheme == "alt":
+                fill_color = _my_colors_alt.get(this_value, (255, 255, 255))
+            elif scheme == "original":
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale1":
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale2":                    
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale3":                    
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale4":                    
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale5":                                                                                
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
             else:
-                if scheme == "wide":
-                    fill_color = _my_colors_wide.get(da_times[count][5][x_counter], (254, 255, 255))
-                elif scheme == "superwide":
-                    fill_color = _my_colors_superwide.get(da_times[count][5][x_counter], (255, 255, 255))
-                elif scheme == "alt":
-                    fill_color = _my_colors_alt.get(da_times[count][5][x_counter], (255, 255, 255))
-                elif scheme == "original":
-                    fill_color = _my_colors_original.get(da_times[count][5][x_counter], (255, 255, 255))
-                else:
-                    fill_color = _my_colors.get(da_times[count][5][x_counter], (255, 255, 255))           
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
             x = (x_counter * 8) + 40
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
