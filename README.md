@@ -324,6 +324,7 @@ graph and legend, named `bar_signed.png` in the current directory:
 
 ## 7. ToDo
 
+* Also need to bring more info in since just passing some data
 * Document range as calculation
 * figure out what to do with walkabout
 * Auto backoff of color scales? - DONE - writeup
