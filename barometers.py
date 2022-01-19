@@ -23,7 +23,7 @@ def match_cache(weather_location):
     """ See if a pickled cache file exists for the rawfile we're reading in """
 
     cache_file = cur_path.joinpath(cache_dir,weather_location)
-    cache_filename = str(cur_path.joinpath(cur_path.cwd(),'cache',weather_location))
+    cache_filename = str(cache_file)
     try:
         file = open(cache_filename, 'rb')
         if the_silence == False:
@@ -91,8 +91,22 @@ def read_in_file(in_file,num_input=256):
                                 
                 l_list(list_to_add)   #needs to be a list because I will use positionals for calculations later
     linecache.clearcache()
+    return l_list
 
-
+def write_cache(weather_location,l_list):
+    """ Writing pickled info to cache """
+    
+    cache_file = cur_path.joinpath(cache_dir,weather_location)
+    cache_filename = str(cache_file)
+    try:
+        cache_file.unlink()
+    except FileNotFoundError:
+        if the_silence == False: 
+            print ("Creating new cache {0}".format(cache_file))
+    
+    file = open(cache_filename, 'wb')
+    pickle.dump(l_list,file)
+    file.close()
 
 
 main(ini):
@@ -141,7 +155,8 @@ main(ini):
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
         if the_silence == False:
             print("Reading in {0}".format(rawfile))
-        read_in_file(format(rawfile),args.num_input)
+        l_list=read_in_file(format(rawfile),args.num_input)
+        write_cache
 
 
 if __name__ == '__main__':
