@@ -3,9 +3,6 @@
 import pathlib
 import linecache
 import configparser
-import os
-from os.path import expanduser
-from appdirs import *
 import pickle, sys, string, argparse, datetime
 from PIL import Image, ImageDraw, ImageFont
 
@@ -14,26 +11,105 @@ appname = "barometers"
 dir_appname = "com.stevensaus.barometers"
 appauthor = "Steven Saus"
 the_silence = False
+cache_overwrite = False
+to_verify = False
 
 cur_path = pathlib.Path()
-cachedir = user_cache_dir(dir_appname)
-configdir = user_config_dir(dir_appname)
-if not os.path.isdir(cachedir):
-    os.makedirs(user_cache_dir(dir_appname))
-if not os.path.isdir(configdir):
-    os.makedirs(user_config_dir(dir_appname))
-ini = os.path.join(configdir,'barometers.ini')
+cache_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'cache')
+data_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'raw')  
+
+
+# generic generators
+
+def _subgen(start,end):
+    for i in range (start,end):
+        yield i
+
+def match_cache(weather_location):
+    """ See if a pickled cache file exists for the rawfile we're reading in """
+
+    cache_file = cur_path.joinpath(cache_dir,weather_location)
+    cache_filename = str(cur_path.joinpath(cur_path.cwd(),'cache',weather_location))
+    try:
+        file = open(cache_filename, 'rb')
+        if the_silence == False:
+            print("Reading in cache for location {0}".format(weather_location))
+        l_list = pickle.load(file)
+        file.close()
+        return l_list
+    except FileNotFoundError:
+        if the_silence == False:
+            print("No cache exists for location {0}".format(cache_file))   
+
+
+def read_in_file(in_file,num_input=256):
+    """ Reading in the new file into the pressures data structure """ 
+    """ Format has to be CITYID.ext or CITYID_whatever.ext """
+        
+    test_stem = str(in_file.stem).strip()
+        
+    if test_stem.find("_") > 0:
+        weather_location = test_stem.split('_',1)[0]
+    else:
+        weather_location = test_stem    
+
+    l_list=match_cache(weather_location)
+    
+    with open(in_file) as f:
+        rowcount = sum(1 for line in f)
+    
+    # auto-adjusting range to input PRN
+    if rowcount <= num_input:
+        count = 0
+        num_input = rowcount
+    else:
+        count = rowcount - num_input
+    
+    while count < rowcount:
+        count += 1
+        row = linecache.getline(str(in_file), count)
+        row = row.replace("@", ",")
+        row = row.strip()
+        if row.find(",,") != -1:
+            continue
+        else: 
+            list_to_add = row.split(',',7)
+            if list_to_add[0] == "epoch":  # header row
+                continue
+            else:
+                if list_to_add[0] in l_list
+                
+                dupe = 0
+                for c1 in pressures:                   
+                    if c1[1] == list_to_add[1] and c1[2] == list_to_add[2]:
+                        dupe = 1
+                
+                if dupe != 1:
+                    # print("adding {0} {1} {2}".format(list_to_add[0],list_to_add[1],list_to_add[2]))
+                    # taking out units if they exist
+                    try:
+                        list_to_add.remove("hPa")
+                    except ValueError:
+                        print("already clean")
+                    
+                    try: 
+                        list_to_add.remove("in")
+                    except ValueError:
+                        print("already clean")
+                                
+                    pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
+    linecache.clearcache()
+
 
 
 
 main(ini):
 """ Pull in configurations, main control function """
 
-    #TODO - add try statement here 
-    config = configparser.ConfigParser()
-    config.read(ini)
-    sections=config.sections()
-
+    global the_silence
+    global cache_overwrite 
+    global to_verify   
+    
     parser = argparse.ArgumentParser(usage=__doc__)
     # generic arguments
     parser.add_argument("-q", "--quiet", dest="quiet",action='store_true', default=False, help="Minimize output to STDOUT/STDERR")
@@ -62,15 +138,18 @@ main(ini):
     parser.add_argument("-W", "--walking", dest="walking",action='store_true', default=False, help="Produce walking value chart")
     args = parser.parse_args()
 
+    if args.quiet is not True:
+        the_silence = False
+    if args.cache_overwrite is not True:
+        cache_overwrite = False
+    if args.verify = is not True:
+        to_verify = False
+        
     # Add in new raw data
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
         if the_silence == False:
             print("Reading in {0}".format(rawfile))
-        
         read_in_file(format(rawfile),args.num_input)
-
-
-
 
 
 if __name__ == '__main__':
