@@ -13,7 +13,8 @@ appauthor = "Steven Saus"
 the_silence = False
 cache_overwrite = False
 to_verify = False
-
+tolerance = 0
+interval = 0 
 cur_path = pathlib.Path()
 cache_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'cache')
 data_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'raw')  
@@ -87,10 +88,14 @@ def read_in_file(in_file,num_input=256):
                 try: 
                     list_to_add.remove("in")
                 except ValueError:
-                    print("already clean")
-                                
+                    print("already clean")                
                 l_list(list_to_add)   #needs to be a list because I will use positionals for calculations later
     linecache.clearcache()
+    if to_verify == True:
+        l_list = verify_data(l_list)
+        
+        def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 300):
+    write_cache(weather_location,l_list)
     return l_list
 
 def write_cache(weather_location,l_list):
@@ -108,6 +113,59 @@ def write_cache(weather_location,l_list):
     pickle.dump(l_list,file)
     file.close()
 
+def verify_data(l_list)
+    """ Ensuring the intervals in the sample are roughly equivalent """
+    multiplier = 0
+    l_list.sort()
+    start_time = l_list[0][0]
+    
+    while multiplier < len(l_list):
+        if multiplier > 0:  # first one goes through
+            now_time = int(input_list[multiplier][0])
+            expected = (start_time + (interval * multiplier)
+            if (abs(now_time - expected)) < tolerance: 
+                o_list.append(l_list[multiplier])
+                multiplier += 1                
+            else:
+                if the_silence == False:
+                    print("Error found with timestamp {0}".format(l_list[count][0]))
+                if now_time > expected:     # there are missed readings. what we 
+                                            # have is actually, start_time + (interval * (multiplier + 4))
+                    submultiplier = multiplier # last accepted multiplier
+                    found_match = False
+                    while now_time > l_list[sub_multiplier][0]:   # so it aborts when hits current time
+                        sub_expected_time=(start_time + (interval * sub_multiplier))
+                        if (abs(now_time - sub_expected_time)) > tolerance:  # found where missed reading stops and is within tolerance
+                            sub_multiplier += 1
+                            #check for end of list, and continue loop
+                        else
+                            found_match = True
+                            if the_silence == False:
+                                print("Detected {0} missing rows; inserting duplicates of last approved row".format(sub_multiplier))
+                            # insert fake rows
+                            #TODO - make sure this doesn't overcount by 1
+                            for add_count in range (multiplier,sub_multiplier):
+                                ts = datetime.datetime.fromtimestamp(start_time + ((add_count + count) * interval))
+                                datestring = ts.strftime("%Y-%m-%d")
+                                timestring = ts.strftime("%H:%M")
+                                fakerow = [ str(start_time + ((add_count + count) * interval)),
+                                        datestring,timestring,
+                                        l_list[count-1][3],l_list[count-1][4],"***" ]
+                                o_list.append(fakerow)
+                            o_list.append(l_list[multiplier])
+                            multiplier = sub_multiplier + 1 # getting everything even
+                elif now_time < expected:     # current reading is too early; is there a good reading ahead of us?
+                    
+                    is this last row?
+                    while not next row, check each row until in tolerance
+
+
+
+
+
+
+                
+        count += 1
 
 main(ini):
 """ Pull in configurations, main control function """
@@ -115,6 +173,8 @@ main(ini):
     global the_silence
     global cache_overwrite 
     global to_verify   
+    global tolerance
+    global interval
     
     parser = argparse.ArgumentParser(usage=__doc__)
     # generic arguments
@@ -131,8 +191,8 @@ main(ini):
     parser.add_argument("-s", "--scheme", dest="scheme",action='store', default=None, help="Color scheme - default, wide, alt, original")
     # verification arguments
     parser.add_argument('-v', '--verify', dest='to_verify', action='store_true', default=False,help="Verify interval ranges")
-    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance_range', default="300",help="Acceptable range in seconds, only makes sense with -v")
-    parser.add_argument('-i', '--interval', action='store',dest='verify_interval', default="1800",help="Expected interval in seconds, only makes sense with -v")    
+    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance', default="300",help="Acceptable range in seconds, only makes sense with -v")
+    parser.add_argument('-i', '--interval', action='store',dest='interval', default="1800",help="Expected interval in seconds, only makes sense with -v")    
     # output arguments
     parser.add_argument('-f', '--file', action='store',dest='fn_stem', default="out",help="Stem for output filename, defaults to out_[abs|signed].png")
     parser.add_argument("-w", "--walk_about", dest="walkabout",action='store_true', default=False, help="Modify walking chart by distance from present")
@@ -150,13 +210,14 @@ main(ini):
         cache_overwrite = False
     if args.verify = is not True:
         to_verify = False
+    tolerance = args.tolerance
+    interval = args.interval
         
     # Add in new raw data
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
         if the_silence == False:
             print("Reading in {0}".format(rawfile))
         l_list=read_in_file(format(rawfile),args.num_input)
-        write_cache
 
 
 if __name__ == '__main__':
