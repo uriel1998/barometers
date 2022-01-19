@@ -19,12 +19,6 @@ cache_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'cache')
 data_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'raw')  
 
 
-# generic generators
-
-def _subgen(start,end):
-    for i in range (start,end):
-        yield i
-
 def match_cache(weather_location):
     """ See if a pickled cache file exists for the rawfile we're reading in """
 
@@ -65,8 +59,8 @@ def read_in_file(in_file,num_input=256):
     else:
         count = rowcount - num_input
     
-    while count < rowcount:
-        count += 1
+    for while count < rowcount:  #the generator stuff was making it hard to read...
+        count += 1 # for linecache's sake
         row = linecache.getline(str(in_file), count)
         row = row.replace("@", ",")
         row = row.strip()
@@ -77,27 +71,25 @@ def read_in_file(in_file,num_input=256):
             if list_to_add[0] == "epoch":  # header row
                 continue
             else:
-                if list_to_add[0] in l_list
+                c1=0
+                while c1 < len(l_list):  # we are numerically looping so we can remove entries
+                    if l_list[c1][0] == list_to_add[0]:
+                        if cache_overwrite == True:
+                            del l_list[c1]
+                        else:
+                            continue  # dupe, next iteration
+                # removing units if they exist in there
+                try:
+                    list_to_add.remove("hPa")
+                except ValueError:
+                    print("already clean")
                 
-                dupe = 0
-                for c1 in pressures:                   
-                    if c1[1] == list_to_add[1] and c1[2] == list_to_add[2]:
-                        dupe = 1
-                
-                if dupe != 1:
-                    # print("adding {0} {1} {2}".format(list_to_add[0],list_to_add[1],list_to_add[2]))
-                    # taking out units if they exist
-                    try:
-                        list_to_add.remove("hPa")
-                    except ValueError:
-                        print("already clean")
-                    
-                    try: 
-                        list_to_add.remove("in")
-                    except ValueError:
-                        print("already clean")
+                try: 
+                    list_to_add.remove("in")
+                except ValueError:
+                    print("already clean")
                                 
-                    pressures.append(list_to_add)   #needs to be a list because I will use positionals for calculations later
+                l_list(list_to_add)   #needs to be a list because I will use positionals for calculations later
     linecache.clearcache()
 
 
