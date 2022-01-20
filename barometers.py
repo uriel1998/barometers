@@ -151,7 +151,7 @@ def verify_data(l_list)
                                 timestring = ts.strftime("%H:%M")
                                 fakerow = [ str(start_time + ((add_count + count) * interval)),
                                         datestring,timestring,
-                                        l_list[count-1][3],l_list[count-1][4],"***" ]
+                                        l_list[count-1][3],l_list[count-1][4],"†" ]
                                 o_list.append(fakerow)
                             o_list.append(l_list[multiplier])
                             multiplier = sub_multiplier + 1 # getting everything even
@@ -167,18 +167,57 @@ def verify_data(l_list)
                         
                         if abs(expected - test_time) < tolerance:
                             skipped_rows = (submultiplier - multiplier)
-                            append_string = "*{0}*".format(skipped_rows)
                             if the_silence = False:
                                 print("Found {0} extra rows before in-tolerance data found.".format(skipped_rows))
                             multiplier=submultiplier
-                            l.list[multiplier].append(append_string)
+                            l.list[multiplier].append("‡")
                             o_list.append(l_list[multiplier])
             multiplier += 1
         else         
             # first row goes through
             o_list.append(l_list[multiplier])
             multiplier += 1
+    o_list.sort
     return o_list
+
+def calculate_data(l_list):
+    """ Calculating the data for the passed in dataset.  """
+    """ The dataset should have 64 prior rows, if possible """
+    
+    if the_silence = False:
+        print("Performing calculations...")
+    count = 0
+    while count < len(l_list):
+        autohealed = " "
+        if "‡" in l_list[count]:
+            autohealed = autohealed + "‡"
+        if "†" in l_list[count]:
+            autohealed = autohealed + "†"
+        
+        # original calculations, put in position 5 of current row
+        subcounter = 1
+        signed_calc = [] 
+
+        curr_row_value = l_list[count][4]
+        while subcounter < count:
+            prior_row_value = l_list[count - subcounter][4]
+            signed_calc.append(int(curr_row_value) - int(prior_row_value))
+            subcounter += 1
+        while subcounter < 64:  # padding the rest 
+            signed_calc.append(int("0")) 
+        l_list[count].insert(5,tuple(signed_calc))  
+
+        # deriving walking calculations from what we just did.
+        walk_calc = []
+        subcounter = 1
+        while subcounter < 64:
+            walk_calc.append = max(signed_calc[:subcount]) - min(signed_calc[:subcount])
+            subcounter += 1
+            
+        l_list[count].insert(6,tuple(walk_calc)) 
+        l_list[count].insert(7,autohealed)
+        count += 1
+    return l_list
 
 
 main(ini):
