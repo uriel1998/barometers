@@ -131,6 +131,7 @@ def verify_data(l_list)
                     print("Error found with timestamp {0}".format(l_list[count][0]))
                 if now_time > expected:     # there are missed readings. what we 
                                             # have is actually, start_time + (interval * (multiplier + 4))
+                                            # So we are changing *expected time* until it matches actual time.
                     submultiplier = multiplier # last accepted multiplier
                     found_match = False
                     while now_time > l_list[sub_multiplier][0]:   # so it aborts when hits current time
@@ -154,18 +155,31 @@ def verify_data(l_list)
                                 o_list.append(fakerow)
                             o_list.append(l_list[multiplier])
                             multiplier = sub_multiplier + 1 # getting everything even
-                elif now_time < expected:     # current reading is too early; is there a good reading ahead of us?
-                    
-                    is this last row?
-                    while not next row, check each row until in tolerance
+                elif now_time < expected:     # current reading is too early but out of tolerance; 
+                                              # is there a good reading ahead of us? So we are incrementing the *row* until we find a good one
+                    submultiplier = multiplier
+                    submultiplier +=1
+                    while submultiplier < len(l_list):
+                        try:
+                            test_time=int(input_list[submultiplier][0])
+                        except IndexError:
+                            continue
+                        
+                        if abs(expected - test_time) < tolerance:
+                            skipped_rows = (submultiplier - multiplier)
+                            append_string = "*{0}*".format(skipped_rows)
+                            if the_silence = False:
+                                print("Found {0} extra rows before in-tolerance data found.".format(skipped_rows))
+                            multiplier=submultiplier
+                            l.list[multiplier].append(append_string)
+                            o_list.append(l_list[multiplier])
+            multiplier += 1
+        else         
+            # first row goes through
+            o_list.append(l_list[multiplier])
+            multiplier += 1
+    return o_list
 
-
-
-
-
-
-                
-        count += 1
 
 main(ini):
 """ Pull in configurations, main control function """
