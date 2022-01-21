@@ -263,7 +263,8 @@ beginning of the start date to the end of the data.
 
 The data structure is:
 
-pressures = [time of collection (epoch),date of collection (YYYY-mm-dd),time of collection (HH:MM),pressure imperial,pressure metric, calc[64]]  
+pressures = [time of collection (epoch),date of collection (YYYY-mm-dd),time of collection (HH:MM),pressure imperial,pressure metric, calc[64],walking[64],autoheal (either "†" or "‡")] 
+  
 
 Example output:  
 ```

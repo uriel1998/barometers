@@ -227,7 +227,60 @@ def display_data(l_list)
         print ("{0}".format(l_list[row]))
 
 
+def get_range(l_list,l_position):
+    """ Obtaining range of points in list (optionally at position inside of list)"""
 
+    l_range = 0
+    l_arange = 0
+    l_max = 0
+    l_min = 0
+    ll_list = []
+
+    if l_position is not None:
+        for row in l_list:
+            ll_list.append(l_list[l_position])
+    else:
+        ll_list = l_list
+
+    for l_object in ll_list:
+        if int(max(l_object)) > l_max:
+            l_max = int(max(l_object))
+        if int(min(l_object)) > l_max:
+            l_max = int(max(l_object))
+        if (l_max - l_min) > l_range:
+            l_range = (l_max - l_min)
+        if abs(l_max - l_min) > l_abs_range:
+            l_abs_range = abs(l_max - l_min)
+        
+    return l_range,l_abs_range
+
+
+def make_chart(l_list,type_of_chart,line_graph,output_stem,user_font)
+    """ Create charts of a passed in slice of the dataset """
+    
+    #look for font in cwd
+    font_path = Path(user_font)
+
+    if font_path.is_file() = True:
+        font_filename = str(font_path)  # this may be superflous
+        font = ImageFont.truetype(font=font_filename, size=7)
+        font2 = ImageFont.truetype(font=font_filename, size=15)
+    else
+        try:
+            font = ImageFont.truetype("Arial", size=7)
+            font2 = ImageFont.truetype("Arial", size=15)
+        except OSError:
+            font = ImageFont.load_default()
+            font2 = ImageFont.load_default()
+            
+    my_image = Image.new('RGB', (552, (len(l_list) * 8)), (125, 125, 125))
+    draw = ImageDraw.Draw(my_image)
+    duration_string = "From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2])
+    if type_of_chart.find("walk") != -1:
+        chart_range, chart_abs_range = get_range(l_list,5)
+    else:
+        chart_range, chart_abs_range = get_range(l_list,6)
+    
 
 ##### make charts
 ##### make line chart
@@ -259,6 +312,7 @@ main(ini):
     parser.add_argument('-t', '--tolerance', action='store',dest='tolerance', default="300",help="Acceptable range in seconds, only makes sense with -v")
     parser.add_argument('-i', '--interval', action='store',dest='interval', default="1800",help="Expected interval in seconds, only makes sense with -v")    
     # output arguments
+    parser.add_argument('-F', '--font', action='store',dest='font', default=None,help="Path to TTF/OTF font if desired")
     parser.add_argument('-f', '--file', action='store',dest='fn_stem', default="out",help="Stem for output filename, defaults to out_[abs|signed].png")
     parser.add_argument("-w", "--walk_about", dest="walkabout",action='store_true', default=False, help="Modify walking chart by distance from present")
     # type of output arguments
