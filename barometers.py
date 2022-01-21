@@ -220,6 +220,18 @@ def calculate_data(l_list):
     return l_list
 
 
+def display_data(l_list)
+    """ Print out the selected data to STDOUT """
+    
+    while row in l_list:
+        print ("{0}".format(l_list[row]))
+
+
+
+
+##### make charts
+##### make line chart
+
 main(ini):
 """ Pull in configurations, main control function """
 
@@ -272,6 +284,7 @@ main(ini):
             print("Reading in {0}".format(rawfile))
         l_list=read_in_file(format(rawfile),args.num_input)
 
+# passing lists (or slices of lists) is all done from here, as 
 
 if __name__ == '__main__':
     main(ini)
