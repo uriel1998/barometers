@@ -255,7 +255,7 @@ def get_range(l_list,l_position):
     return l_range,l_abs_range
 
 
-def make_chart(l_list,type_of_chart,line_graph,output_stem,user_font)
+def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
     """ Create charts of a passed in slice of the dataset """
     
     #look for font in cwd
@@ -281,7 +281,62 @@ def make_chart(l_list,type_of_chart,line_graph,output_stem,user_font)
     else:
         chart_range, chart_abs_range = get_range(l_list,6)
     
+    if scheme == "auto":  # There is probably a more clever way to do this, but...
+        if chart_range < 12 and chart_abs_range < 24:
+            scheme = "autoscale1"
+        elif chart_range < 18 and chart_abs_range < 36:
+            scheme = "autoscale2"           
+        elif chart_range < 24 and chart_abs_range < 48:            
+            scheme = "autoscale3"
+        elif chart_range < 36 and chart_abs_range < 72:
+            scheme = "autoscale4"           
+        elif chart_range < 48 and chart_abs_range < 96:
+            scheme = "autoscale5"
 
+    if the_silence == False: 
+        print ("Creating chart with {0} colorscheme...".format(scheme))
+    
+    y = 0
+    for row in l_list:
+        if type_of_chart.find("walk") != -1:
+            the_index = 5 
+        else:
+            the_index = 6
+            
+        x_counter = 0        
+        for this_value in row[the_index]:
+            if type_of_chart.find("abs") != -1:
+                this_value = abs(this_value)
+                
+            if scheme == "wide":
+                fill_color = _my_colors_wide.get(this_value, (254, 255, 255))
+            elif scheme == "superwide":
+                fill_color = _my_colors_superwide.get(this_value, (255, 255, 255))
+            elif scheme == "alt":
+                fill_color = _my_colors_alt.get(this_value, (255, 255, 255))
+            elif scheme == "original":
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale1":
+                fill_color = _my_colors_autoscale1.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale2":                    
+                fill_color = _my_colors_autoscale2.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale3":                    
+                fill_color = _my_colors_autoscale3.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale4":                    
+                fill_color = _my_colors_autoscale4.get(this_value, (255, 255, 255))
+            elif scheme == "autoscale5":                                                                                
+                fill_color = _my_colors_autoscale5.get(this_value, (255, 255, 255))
+            else:
+                fill_color = _my_colors_original.get(this_value, (255, 255, 255))
+            x = (x_counter * 8) + 40
+            draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
+            x_counter += 1
+        timestring = str(row[2]) + str(row[7])  # autoheal marker    
+        draw.text((5, y), str(timestring), fill="white", font=font)
+        y += 8
+# now is for linegraph overlay
+            
+            
 ##### make charts
 ##### make line chart
 
