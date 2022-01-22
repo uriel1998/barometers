@@ -96,7 +96,6 @@ def read_in_file(in_file,num_input=256):
         
         def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 300):
     write_cache(weather_location,l_list)
-    return l_list
 
 def write_cache(weather_location,l_list):
     """ Writing pickled info to cache """
@@ -370,11 +369,6 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
 
     draw.text((100, 25), da_duration, fill="white", font=font2, stroke_width=2, stroke_fill="black")
 
-    
-        file_string = "_abs"
-    
-        this_value = abs(this_value)
-
     if type_of_chart.find("abs") != -1:
         fn = "{0}_abs.png".format(output_stem)
     elif type_of_chart.find("walk") != -1:    
@@ -384,9 +378,29 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
         
     my_image.save(fn)
 
-            
 
-main(ini):
+def choose_date_slice(l_list,start_date,end_date):
+    """ Slice out from date range, return list """
+    
+    l_list.sort()
+    try: 
+        first_slice=l_list.index(start_date)
+        if end_date is not None:
+            l_list.reverse()
+            try:
+                last_slice=l_list.index(end_date)
+                l_list.reverse()
+                return l_list(first_slice:last_slice)
+            except ValueError:
+                l_list.reverse()
+                return l_list(first_slice:)
+        else
+            return l_list(first_slice:)
+    except ValueError:
+        return l_list   
+
+
+def main(ini):
 """ Pull in configurations, main control function """
 
     global the_silence
@@ -437,7 +451,59 @@ main(ini):
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
         if the_silence == False:
             print("Reading in {0}".format(rawfile))
-        l_list=read_in_file(format(rawfile),args.num_input)
+        read_in_file(format(rawfile),args.num_input)
+
+    
+    
+    if args.showdata == True:
+    
+    if args.linegraph == True:
+    
+    if args.signval == True:
+    
+    if args.absval == True:
+        
+    if args.walking == True:
+        
+    if args.start_date is not None:
+        l_list = choose_date_slice(l_list,args.start_date,args.end_date)    
+
+# start and end date code goes here
+######### actually, we should determine if they want any type of chart output
+######### and THEN do this stuff
+    if args.bout_here is not None:
+        weather_location = args.bout_here
+        l_list = match_cache(weather_location)
+    else:
+        cache_count = 0
+        for scratch in pathlib.Path(cache_dir).iterdir():
+            if path.is_file():
+                cache_count += 1
+        if cache_count < 1:
+            
+
+# for if bout here aint set
+import pathlib
+initial_count = 0
+for path in pathlib.Path(".").iterdir():
+    if path.is_file():
+        initial_count += 1
+
+print(initial_count)
+
+# get # of display records
+# get file
+# get font
+# 
+# get scheme
+
+
+# TODO - actually calling functions, lol
+
+        if args.to_verify == True:
+            if the_silence == False:
+                print ("Checking intervals...")
+                verify_data(l_list)
 
 # passing lists (or slices of lists) is all done from here, as 
 
