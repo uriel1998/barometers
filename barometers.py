@@ -390,12 +390,12 @@ def choose_date_slice(l_list,start_date,end_date):
             try:
                 last_slice=l_list.index(end_date)
                 l_list.reverse()
-                return l_list(first_slice:last_slice)
+                return l_list[first_slice:last_slice]
             except ValueError:
                 l_list.reverse()
-                return l_list(first_slice:)
+                return l_list[first_slice:]
         else
-            return l_list(first_slice:)
+            return l_list[first_slice:]
     except ValueError:
         return l_list   
 
@@ -454,58 +454,54 @@ def main(ini):
         read_in_file(format(rawfile),args.num_input)
 
     
-    
+    type_of_chart = None  # Not sure if you can append to a none variable?
     if args.showdata == True:
-    
-    if args.linegraph == True:
-    
+        type_of_chart = type_of_chart + "show"
     if args.signval == True:
-    
+        type_of_chart = type_of_chart + "sign"    
     if args.absval == True:
-        
+        type_of_chart = type_of_chart + "abs"        
     if args.walking == True:
+        type_of_chart = type_of_chart + "walk"
+
+    if type_of_chart is not None:  
+
+        if args.bout_here is not None:
+            weather_location = args.bout_here
+        else:
+            cache_count = 0
+            for scratch in pathlib.Path(cache_dir).iterdir():
+                if scratch.is_file():
+                    cache_count += 1
+            if cache_count = 1:
+                test_stem = str(scratch.stem).strip()
+                if test_stem.find("_") > 0:
+                    weather_location = test_stem.split('_',1)[0]
+                else:
+                    weather_location = test_stem 
+        if weather_location is not None:
+            l_list = match_cache(weather_location)
         
-    if args.start_date is not None:
-        l_list = choose_date_slice(l_list,args.start_date,args.end_date)    
+        if args.start_date is not None:
+            l_list = choose_date_slice(l_list,args.start_date,args.end_date)    
+        if args.num_output is not None:
+            scratch = (1 - args.num_output)
+            l_list = l_list[scratch:]
+        if to_verify == True:
+            verify_data(l_list)
+        l_list=calculate_data(l_list)
 
-# start and end date code goes here
-######### actually, we should determine if they want any type of chart output
-######### and THEN do this stuff
-    if args.bout_here is not None:
-        weather_location = args.bout_here
-        l_list = match_cache(weather_location)
-    else:
-        cache_count = 0
-        for scratch in pathlib.Path(cache_dir).iterdir():
-            if path.is_file():
-                cache_count += 1
-        if cache_count < 1:
-            
+        if type_of_chart.find("show") != -1: 
+            display_data(l_list)
+        if type_of_chart.find("abs") != -1: 
+            make_chart(l_list,"abs",args.scheme,args.linegraph,args.fn_stem,args.font)
+        if type_of_chart.find("signed") != -1: 
+            make_chart(l_list,"sign",args.scheme,args.linegraph,args.fn_stem,args.font)
+        if type_of_chart.find("walk") != -1: 
+            make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
+        else:
+            print("No location specified and/or multiple cache files exist. Please specify.")
 
-# for if bout here aint set
-import pathlib
-initial_count = 0
-for path in pathlib.Path(".").iterdir():
-    if path.is_file():
-        initial_count += 1
-
-print(initial_count)
-
-# get # of display records
-# get file
-# get font
-# 
-# get scheme
-
-
-# TODO - actually calling functions, lol
-
-        if args.to_verify == True:
-            if the_silence == False:
-                print ("Checking intervals...")
-                verify_data(l_list)
-
-# passing lists (or slices of lists) is all done from here, as 
 
 if __name__ == '__main__':
     main(ini)
