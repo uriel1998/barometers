@@ -255,6 +255,30 @@ def get_range(l_list,l_position):
     return l_range,l_abs_range
 
 
+def data_for_line_graph(l_times):
+    """ Arrange line graph data and scale appropriately for size of chart  """
+
+    my_points = []
+    for count in l_times:
+        my_points.append(int(l_times[count][4]))
+
+       
+    my_range = max(my_points) - min(my_points)
+    my_scalar = 0
+    while (450 - (my_range * my_scalar)) > 1:
+        my_scalar += 1
+        
+    my_max=max(my_points)
+    my_min=min(my_points)
+    my_plot = []
+    
+    for count in my_points:
+        point=(512-(abs(my_max - my_points[count]) * my_scalar)) 
+        my_plot.append(tuple([point,(count*8)]))  
+
+    return my_plot, my_max, my_min, my_range
+
+
 def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
     """ Create charts of a passed in slice of the dataset """
     
@@ -298,8 +322,8 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
     
     y = 0
     for row in l_list:
-        if type_of_chart.find("walk") != -1:
-            the_index = 5 
+        if type_of_chart.find("walk") != -1: # doing it this way means one variable
+            the_index = 5                    # four possible conditions
         else:
             the_index = 6
             
@@ -335,10 +359,32 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
         draw.text((5, y), str(timestring), fill="white", font=font)
         y += 8
 # now is for linegraph overlay
+    if line_graph == True:
+        if the_silence == False:
+            print ("Creating line graph...")
+        
+        points, val_max, val_min, val_range = data_for_my_graph(l_list)
+        draw.line(points, width=5, fill="green", joint="curve")  
+        da_string = "Max: {0} Min: {1} Range: {2}".format(val_max,val_min,val_range) 
+        draw.text((100, 45), da_string, fill="white", font=font2, stroke_width=2, stroke_fill="black")
+
+    draw.text((100, 25), da_duration, fill="white", font=font2, stroke_width=2, stroke_fill="black")
+
+    
+        file_string = "_abs"
+    
+        this_value = abs(this_value)
+
+    if type_of_chart.find("abs") != -1:
+        fn = "{0}_abs.png".format(output_stem)
+    elif type_of_chart.find("walk") != -1:    
+        fn = "{0}_walk.png".format(output_stem)
+    else: 
+        fn = "{0}_signed.png".format(output_stem)
+        
+    my_image.save(fn)
+
             
-            
-##### make charts
-##### make line chart
 
 main(ini):
 """ Pull in configurations, main control function """
