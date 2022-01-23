@@ -186,11 +186,11 @@ def verify_data(l_list):
 
 def calculate_data(l_list):
     """ Calculating the data for the passed in dataset.  """
-    """ The dataset should have 64 prior rows, if possible """
-    
+        
     if the_silence == False:
         print("Performing calculations...")
     count = 0
+    print ("{0}:{1}".format(count,len(l_list)))
     while count < len(l_list):
         autohealed = " "
         if "‡" in l_list[count]:
@@ -209,13 +209,14 @@ def calculate_data(l_list):
             subcounter += 1
         while subcounter < 64:  # padding the rest 
             signed_calc.append(int("0")) 
+            subcounter += 1
         l_list[count].insert(5,tuple(signed_calc))  
 
         # deriving walking calculations from what we just did.
         walk_calc = []
         subcounter = 1
         while subcounter < 64:
-            walk_calc.append = max(signed_calc[:subcount]) - min(signed_calc[:subcount])
+            walk_calc.append(max(signed_calc[:subcounter]) - min(signed_calc[:subcounter]))
             subcounter += 1
             
         l_list[count].insert(6,tuple(walk_calc)) 
@@ -227,8 +228,10 @@ def calculate_data(l_list):
 def display_data(l_list):
     """ Print out the selected data to STDOUT """
     
-    while row in l_list:
+    row = 0
+    while row < len(l_list):
         print ("{0}".format(l_list[row]))
+        row += 1
 
 
 def get_range(l_list,l_position):
@@ -472,7 +475,6 @@ def main(ini):
             print("Reading in {0}".format(rawfile))
         read_in_file(rawfile,args.num_input)
 
-
     if args.get_data == True:
         if weather_location is None:
             print ("Location not set in ini or commandline")
@@ -491,9 +493,8 @@ def main(ini):
             addrow = [ str(ts),datestring,timestring,now_imperial,now_metric ]
             l_list.append(addrow)
             write_cache(weather_location,l_list)
-
     
-    type_of_chart = None  # Not sure if you can append to a none variable?
+    type_of_chart = ""
     if args.showdata == True:
         type_of_chart = type_of_chart + "show"
     if args.signval == True:
@@ -527,8 +528,7 @@ def main(ini):
             make_chart(l_list,"sign",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("walk") != -1: 
             make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
-        else:
-            print("No location specified and/or multiple cache files exist. Please specify.")
+
     else:
         exit()
 
