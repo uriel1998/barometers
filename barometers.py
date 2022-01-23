@@ -50,7 +50,9 @@ def read_in_file(in_file,num_input=256):
         weather_location = test_stem    
 
     l_list=match_cache(weather_location)
-    
+    if l_list is None:
+        l_list=[]
+        
     with open(in_file) as f:
         rowcount = sum(1 for line in f)
     
@@ -61,7 +63,8 @@ def read_in_file(in_file,num_input=256):
     else:
         count = rowcount - num_input
     
-    while count < rowcount:  #the generator stuff was making it hard to read...
+    
+    while count < rowcount:  
         count += 1 # for linecache's sake
         row = linecache.getline(str(in_file), count)
         row = row.replace("@", ",")
@@ -73,24 +76,26 @@ def read_in_file(in_file,num_input=256):
             if list_to_add[0] == "epoch":  # header row
                 continue
             else:
-                c1=0
-                while c1 < len(l_list):  # we are numerically looping so we can remove entries
-                    if l_list[c1][0] == list_to_add[0]:
-                        if cache_overwrite == True:
-                            del l_list[c1]
-                        else:
-                            continue  # dupe, next iteration
-                # removing units if they exist in there
+                if len(l_list) != 0:
+                    c1=0
+                    while c1 < len(l_list):  # we are numerically looping so we can remove entries
+                        if int(l_list[c1][0]) == int(list_to_add[0]):
+                            if cache_overwrite == True:
+                                if the_silence == False: 
+                                    print("Duplicate; overwriting cache entry at {0}".format(list_to_add[0]))
+                                del l_list[c1]
+                        c1 += 1
                 try:
                     list_to_add.remove("hPa")
                 except ValueError:
                     print("already clean")
-                
                 try: 
                     list_to_add.remove("in")
                 except ValueError:
-                    print("already clean")                
-                l_list(list_to_add)   #needs to be a list because I will use positionals for calculations later
+                    print("already clean")  
+                l_list.append(list_to_add)   
+                
+                
     linecache.clearcache()
     if to_verify == True:
         l_list = verify_data(l_list)
@@ -450,25 +455,25 @@ def main(ini):
     parser.add_argument("-W", "--walking", dest="walking",action='store_true', default=False, help="Produce walking value chart")
     args = parser.parse_args()
 
-    if args.quiet is not True:
-        the_silence = False
-    if args.cache_overwrite is not True:
-        cache_overwrite = False
-    if args.verify is not True:
-        to_verify = False
+    if args.quiet is True:
+        the_silence = True
+    if args.cache_overwrite is True:
+        cache_overwrite = True
+    if args.to_verify is True:
+        to_verify = True
     tolerance = args.tolerance
     interval = args.interval
-    if args.bout_here is not None:
+    if args.bout_here != None:
         weather_location = args.bout_here
         
     # Add in new raw data
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
         if the_silence == False:
             print("Reading in {0}".format(rawfile))
-        read_in_file(format(rawfile),args.num_input)
+        read_in_file(rawfile,args.num_input)
 
 
-    if args.getdata == True:
+    if args.get_data == True:
         if weather_location is None:
             print ("Location not set in ini or commandline")
         else:
@@ -528,6 +533,6 @@ def main(ini):
         exit()
 
 if __name__ == '__main__':
-    main(ini)
+    main(ini_file)
 else:
     print("barometers loaded as a module")
