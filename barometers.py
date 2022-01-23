@@ -3,6 +3,7 @@
 import pathlib
 import linecache
 import configparser
+import requests
 import pickle, sys, string, argparse, datetime
 from PIL import Image, ImageDraw, ImageFont
 
@@ -454,6 +455,8 @@ def main(ini):
         to_verify = False
     tolerance = args.tolerance
     interval = args.interval
+    if args.bout_here is not None:
+        weather_location = args.bout_here
         
     # Add in new raw data
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
@@ -461,7 +464,25 @@ def main(ini):
             print("Reading in {0}".format(rawfile))
         read_in_file(format(rawfile),args.num_input)
 
-#### New retrieve code will go here!!!
+
+    if args.getdata == True:
+        if weather_location is None:
+            print ("Location not set in ini or commandline")
+        else
+            if the_silence == False:
+                print("Obtaining new data for {0}".format(weather_location))
+            l_list=match_cache(weather_location)
+            base_url = "http://api.openweathermap.org/data/2.5/weather?id="
+            final_url = base_url + weather_location + "&units=metric&appid=" + api_key
+            weather_data = requests.get(final_url).json()
+            now_metric = weather_data['main']['pressure']
+            now_imperial=round(now_metric/33.863886666667,2)
+            ts = round(datetime.datetime.timestamp(datetime.datetime.utcnow()))
+            datestring = ts.strftime("%Y-%m-%d")
+            timestring = ts.strftime("%H:%M")
+            addrow = [ str(ts),datestring,timestring,now_imperial,now_metric ]
+            l_list.append(addrow)
+            write_cache(weather_location,l_list)
 
     
     type_of_chart = None  # Not sure if you can append to a none variable?
@@ -475,10 +496,6 @@ def main(ini):
         type_of_chart = type_of_chart + "walk"
 
     if type_of_chart is not None:  
-
-        if args.bout_here is not None:
-            weather_location = args.bout_here
-
         if weather_location is not None:
             l_list = match_cache(weather_location)
         else:
