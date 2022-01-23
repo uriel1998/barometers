@@ -61,7 +61,7 @@ def read_in_file(in_file,num_input=256):
     else:
         count = rowcount - num_input
     
-    for while count < rowcount:  #the generator stuff was making it hard to read...
+    while count < rowcount:  #the generator stuff was making it hard to read...
         count += 1 # for linecache's sake
         row = linecache.getline(str(in_file), count)
         row = row.replace("@", ",")
@@ -95,7 +95,6 @@ def read_in_file(in_file,num_input=256):
     if to_verify == True:
         l_list = verify_data(l_list)
         
-        def check_intervals(input_list, start, last, num_output = 64, interval = 1800, tolerance = 300):
     write_cache(weather_location,l_list)
 
 def write_cache(weather_location,l_list):
@@ -113,7 +112,7 @@ def write_cache(weather_location,l_list):
     pickle.dump(l_list,file)
     file.close()
 
-def verify_data(l_list)
+def verify_data(l_list):
     """ Ensuring the intervals in the sample are roughly equivalent """
     multiplier = 0
     l_list.sort()
@@ -122,8 +121,8 @@ def verify_data(l_list)
     while multiplier < len(l_list):
         if multiplier > 0:  # first one goes through
             now_time = int(input_list[multiplier][0])
-            expected = (start_time + (interval * multiplier)
-            if (abs(now_time - expected)) < tolerance: 
+            expected = (start_time + (interval * multiplier))
+            if abs(now_time - expected) < tolerance: 
                 o_list.append(l_list[multiplier])
                 multiplier += 1                
             else:
@@ -139,7 +138,7 @@ def verify_data(l_list)
                         if (abs(now_time - sub_expected_time)) > tolerance:  # found where missed reading stops and is within tolerance
                             sub_multiplier += 1
                             #check for end of list, and continue loop
-                        else
+                        else:
                             found_match = True
                             if the_silence == False:
                                 print("Detected {0} missing rows; inserting duplicates of last approved row".format(sub_multiplier))
@@ -166,14 +165,14 @@ def verify_data(l_list)
                             continue
                         
                         if abs(expected - test_time) < tolerance:
-                            skipped_rows = (submultiplier - multiplier)
-                            if the_silence = False:
+                            skipped_rows = submultiplier - multiplier
+                            if the_silence == False:
                                 print("Found {0} extra rows before in-tolerance data found.".format(skipped_rows))
                             multiplier=submultiplier
                             l.list[multiplier].append("‡")
                             o_list.append(l_list[multiplier])
             multiplier += 1
-        else         
+        else:         
             # first row goes through
             o_list.append(l_list[multiplier])
             multiplier += 1
@@ -184,7 +183,7 @@ def calculate_data(l_list):
     """ Calculating the data for the passed in dataset.  """
     """ The dataset should have 64 prior rows, if possible """
     
-    if the_silence = False:
+    if the_silence == False:
         print("Performing calculations...")
     count = 0
     while count < len(l_list):
@@ -220,7 +219,7 @@ def calculate_data(l_list):
     return l_list
 
 
-def display_data(l_list)
+def display_data(l_list):
     """ Print out the selected data to STDOUT """
     
     while row in l_list:
@@ -279,17 +278,17 @@ def data_for_line_graph(l_times):
     return my_plot, my_max, my_min, my_range
 
 
-def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font)
+def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
     """ Create charts of a passed in slice of the dataset """
     
     #look for font in cwd
     font_path = Path(user_font)
 
-    if font_path.is_file() = True:
+    if font_path.is_file() == True:
         font_filename = str(font_path)  # this may be superflous
         font = ImageFont.truetype(font=font_filename, size=7)
         font2 = ImageFont.truetype(font=font_filename, size=15)
-    else
+    else:
         try:
             font = ImageFont.truetype("Arial", size=7)
             font2 = ImageFont.truetype("Arial", size=15)
@@ -386,23 +385,25 @@ def choose_date_slice(l_list,start_date,end_date):
     l_list.sort()
     try: 
         first_slice=l_list.index(start_date)
-        if end_date is not None:
-            l_list.reverse()
-            try:
-                last_slice=l_list.index(end_date)
-                l_list.reverse()
-                return l_list[first_slice:last_slice]
-            except ValueError:
-                l_list.reverse()
-                return l_list[first_slice:]
-        else
-            return l_list[first_slice:]
     except ValueError:
         return l_list   
 
+    if end_date is not None:
+        l_list.reverse()
+        try:
+            last_slice=l_list.index(end_date)
+            l_list.reverse()
+            return l_list[first_slice:last_slice]
+        except ValueError:
+            l_list.reverse()
+            return l_list[first_slice:]
+    else:
+        return l_list[first_slice:]
+    
+
 
 def main(ini):
-""" Pull in configurations, main control function """
+    """ Pull in configurations, main control function """
 
     global the_silence
     global cache_overwrite 
@@ -417,6 +418,8 @@ def main(ini):
         api_key = config['DEFAULT']['owm_api']
         weather_location = str.lower(config['DEFAULT']['city_id'])
     except FileNotFoundError: 
+        api_key = None
+        weather_location = None
 
     parser = argparse.ArgumentParser(usage=__doc__)
     # generic arguments
@@ -426,7 +429,7 @@ def main(ini):
     parser.add_argument("-r", "--retrieve-current", dest="get_data",action='store_true', default=False, help="Get reading from OpenWeatherMap")    
     parser.add_argument("-o", "--overwrite-cache", dest="cache_overwrite",action='store_true', default=False, help="Overwrite cache data when importing new data.")
     # choosing arguments
-    parser.add_argument('-B', '--bout-here', action='store', dest='bout_here',help="Where to output/input weather location from."    
+    parser.add_argument('-B', '--bout-here', action='store', dest='bout_here',help="Where to output/input weather location from.")    
     parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None,help="Provide the start date for chart or calculation data.")
     parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None,help="Provide the end date for chart or calculation data; optional, only makes sense with --begin-date.")
     parser.add_argument("-d", "--display-records", type=int, help="number of records back to display", default=None,action='store',dest='num_output')
@@ -451,7 +454,7 @@ def main(ini):
         the_silence = False
     if args.cache_overwrite is not True:
         cache_overwrite = False
-    if args.verify = is not True:
+    if args.verify is not True:
         to_verify = False
     tolerance = args.tolerance
     interval = args.interval
@@ -468,7 +471,7 @@ def main(ini):
     if args.getdata == True:
         if weather_location is None:
             print ("Location not set in ini or commandline")
-        else
+        else:
             if the_silence == False:
                 print("Obtaining new data for {0}".format(weather_location))
             l_list=match_cache(weather_location)
