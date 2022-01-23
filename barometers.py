@@ -16,9 +16,9 @@ to_verify = False
 tolerance = 0
 interval = 0 
 cur_path = pathlib.Path()
-cache_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'cache')
-data_dir = cache_path = cur_path.joinpath(cur_path.cwd(),'raw')  
-
+cache_dir = cur_path.joinpath(cur_path.cwd(),'cache')
+data_dir = cur_path.joinpath(cur_path.cwd(),'raw')  
+ini_file = cur_path.joinpath(cur_path.cwd(),'barometers.ini')  
 
 def match_cache(weather_location):
     """ See if a pickled cache file exists for the rawfile we're reading in """
@@ -409,6 +409,14 @@ def main(ini):
     global tolerance
     global interval
     
+    config = configparser.ConfigParser()
+    try:
+        config.read(ini_file)
+        sections=config.sections()
+        api_key = config['DEFAULT']['owm_api']
+        weather_location = str.lower(config['DEFAULT']['city_id'])
+    except FileNotFoundError: 
+
     parser = argparse.ArgumentParser(usage=__doc__)
     # generic arguments
     parser.add_argument("-q", "--quiet", dest="quiet",action='store_true', default=False, help="Minimize output to STDOUT/STDERR")
@@ -453,6 +461,8 @@ def main(ini):
             print("Reading in {0}".format(rawfile))
         read_in_file(format(rawfile),args.num_input)
 
+#### New retrieve code will go here!!!
+
     
     type_of_chart = None  # Not sure if you can append to a none variable?
     if args.showdata == True:
@@ -468,19 +478,12 @@ def main(ini):
 
         if args.bout_here is not None:
             weather_location = args.bout_here
-        else:
-            cache_count = 0
-            for scratch in pathlib.Path(cache_dir).iterdir():
-                if scratch.is_file():
-                    cache_count += 1
-            if cache_count = 1:
-                test_stem = str(scratch.stem).strip()
-                if test_stem.find("_") > 0:
-                    weather_location = test_stem.split('_',1)[0]
-                else:
-                    weather_location = test_stem 
+
         if weather_location is not None:
             l_list = match_cache(weather_location)
+        else:
+            print ("Location not set in ini or commandline")
+            exit()
         
         if args.start_date is not None:
             l_list = choose_date_slice(l_list,args.start_date,args.end_date)    
@@ -501,7 +504,8 @@ def main(ini):
             make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
         else:
             print("No location specified and/or multiple cache files exist. Please specify.")
-
+    else:
+        exit()
 
 if __name__ == '__main__':
     main(ini)
