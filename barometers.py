@@ -66,15 +66,6 @@ _my_colors_autoscale5 = {0:(0, 0, 0), 1:(0, 0, 64), 2:(0, 0, 96), 3:(0, 0, 128),
 
 
 
-
-
-
-
-
-
-
-
-
 def match_cache(weather_location):
     """ See if a pickled cache file exists for the rawfile we're reading in """
 
@@ -178,15 +169,35 @@ def verify_data(l_list):
     start_time = l_list[0][0]
     o_list=[]
     while multiplier < len(l_list):
+        # Condition #1 - first one in dataset, automatically goes through
         if multiplier > 0:  # first one goes through
             now_time = int(l_list[multiplier][0])
             expected = int(start_time) + (int(interval) * int(multiplier))
+            # Condition #2 - expected == actual +- tolerance
             if abs(now_time - expected) < int(tolerance): 
                 o_list.append(l_list[multiplier])
                 multiplier += 1                
             else:
                 if the_silence == False:
                     print("Error found with timestamp {0}".format(l_list[multiplier][0]))
+                    #Condition #3 - the actual time is outside of tolerance, and lower than expected (too early)
+                    ## In this case, we have extra readings, most likely. (Or drift, but ugh)
+                    ## So maybe just skip this reading, append the correction mark to the prior reading?
+                
+                
+                
+                
+                
+                    #Condition #4 - the actual time is outside of tolerance, and higher than expected (missed a reading)
+                    ## Does this ever match?
+                    ## That is:
+                    ### Before the next reading time
+                    #### Does this reading actually match at any point?
+                    ##### If so, how many missed readings were there?
+                
+                    # Possibility - drifting. Shouldn't occur unless first data row is off.
+                
+                
                 if now_time > expected:     # there are missed readings. what we 
                                             # have is actually, start_time + (interval * (multiplier + 4))
                                             # So we are changing *expected time* until it matches actual time.
