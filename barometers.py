@@ -265,7 +265,6 @@ def calculate_data(l_list):
             signed_calc.append(int("0")) 
             subcounter += 1
         l_list[count].insert(5,tuple(signed_calc))  
-
         # deriving walking calculations from what we just did.
         walk_calc = []
         subcounter = 1
@@ -400,9 +399,9 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             
         x_counter = 0        
         for this_value in row[the_index]:
-            if type_of_chart.find("abs") != -1:
+            if type_of_chart.find("abs") != -1:                
                 this_value = abs(this_value)
-                
+               
             if scheme == "wide":
                 fill_color = _my_colors_wide.get(this_value, (254, 255, 255))
             elif scheme == "superwide":
@@ -567,13 +566,20 @@ def main(ini):
         type_of_chart = type_of_chart + "abs"        
     if args.walking == True:
         type_of_chart = type_of_chart + "walk"
+    
 
-    if type_of_chart is not None:  
+    if len(type_of_chart) > 0:  
         if weather_location is not None:
             l_list = match_cache(weather_location)
         else:
             print ("Location not set in ini or commandline")
             exit()
+        
+        
+        ##### TODO TODO TODO
+        ##### OH I FORGOT TO ADD IN THE PRIOR DATA AND THEN TRIM IT BACK OFF AGAIN 
+        ##### SO THERE AREN'T BLACK SPOTS AT THE BEGINNING OF THE SELECTED DATA
+        ##### THAT NEEDS TO HAPPEN HERE
         
         if args.start_date is not None:
             l_list = choose_date_slice(l_list,args.start_date,args.end_date)    
@@ -582,13 +588,17 @@ def main(ini):
             l_list = l_list[scratch:]
         if to_verify == True:
             verify_data(l_list)
+        
+        
+        
         l_list=calculate_data(l_list)
 
         if type_of_chart.find("show") != -1: 
             display_data(l_list)
         if type_of_chart.find("abs") != -1: 
             make_chart(l_list,"abs",args.scheme,args.linegraph,args.fn_stem,args.font)
-        if type_of_chart.find("signed") != -1: 
+        if type_of_chart.find("sign") != -1: 
+            print("{0}".format(type_of_chart))
             make_chart(l_list,"sign",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("walk") != -1: 
             make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
