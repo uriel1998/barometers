@@ -240,11 +240,11 @@ def verify_data(l_list):
 
 def calculate_data(l_list):
     """ Calculating the data for the passed in dataset.  """
-        
+
     if the_silence == False:
         print("Performing calculations...")
     count = 0
-    
+    print("{0}".format(len(l_list)))    
     while count < len(l_list):
         autohealed = " "
         if "‡" in l_list[count]:
@@ -264,7 +264,7 @@ def calculate_data(l_list):
         while subcounter < 64:  # padding the rest 
             signed_calc.append(int("0")) 
             subcounter += 1
-        l_list[count].insert(5,tuple(signed_calc))  
+        l_list[count].insert(5,tuple(signed_calc)) 
         # deriving walking calculations from what we just did.
         walk_calc = []
         subcounter = 1
@@ -275,6 +275,7 @@ def calculate_data(l_list):
         l_list[count].insert(6,tuple(walk_calc)) 
         l_list[count].insert(7,autohealed)
         count += 1
+    print("sd {0}".format(len(l_list)))
     return l_list
 
 
@@ -399,8 +400,10 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             
         x_counter = 0        
         for this_value in row[the_index]:
-            if type_of_chart.find("abs") != -1:                
+            if type_of_chart.find("abs") != -1:       ### why am I not seeing this?
                 this_value = abs(this_value)
+            else:
+                this_value = int(this_value)
                
             if scheme == "wide":
                 fill_color = _my_colors_wide.get(this_value, (254, 255, 255))
@@ -452,23 +455,27 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
 
 def choose_date_slice(l_list,start_date,end_date):
     """ Find start and end point of date in list """
-    
+    first_slice = 0
+    last_slice = len(l_list)
     l_list.sort()
-    try: 
-        first_slice=l_list.index(start_date)
-    except ValueError:
-        first_slice=0
-
+    if start_date != None:
+        count=0
+        while count < len(l_list):
+            if l_list[count][1] == start_date:
+                first_slice=count
+                count=len(l_list)
+            count += 1
+            
     if end_date != None:
         l_list.reverse()
-        try:
-            last_slice= 1 - l_list.index(end_date)
-            return first_slice,last_slice
-        except ValueError:
-            return first_slice,len(l_list)
-            
-    else:
-        return first_slice,len(l_list)
+        count=0
+        while count < len(l_list):
+            if l_list[count][1] == end_date:
+                last_slice=len(l_list) - count 
+                count=len(l_list)
+            count+=1
+        l_list.reverse()
+    return first_slice,last_slice
 
 
 def main(ini):
@@ -580,11 +587,10 @@ def main(ini):
         # Selection of data to calculate and display
         if args.start_date != None:
             display_start,display_end = choose_date_slice(l_list,args.start_date,args.end_date)    
-        
-        if args.num_output != None:
+        elif args.num_output != None:
             display_start = (len(l_list) - num_output)
             display_end = len(l_list)
-        
+
         # Adjustment of data selection so that calculations go through properly
         calc_start_adjust = 1
         while calc_start_adjust < 64:
@@ -599,7 +605,7 @@ def main(ini):
             l_list = verify_data(l_list[(display_start - calc_start_adjust):display_end])
         
         l_list=calculate_data(l_list[(display_start - calc_start_adjust):display_end])
-        l_list=l_list[-calc_start_adjust:len(l_list)]
+        l_list=l_list[calc_start_adjust:len(l_list)]
         
         if type_of_chart.find("show") != -1: 
             display_data(l_list)
