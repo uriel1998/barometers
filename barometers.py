@@ -451,26 +451,24 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
 
 
 def choose_date_slice(l_list,start_date,end_date):
-    """ Slice out from date range, return list """
+    """ Find start and end point of date in list """
     
     l_list.sort()
     try: 
         first_slice=l_list.index(start_date)
     except ValueError:
-        return l_list   
+        first_slice=0
 
-    if end_date is not None:
+    if end_date != None:
         l_list.reverse()
         try:
-            last_slice=l_list.index(end_date)
-            l_list.reverse()
-            return l_list[first_slice:last_slice]
+            last_slice= 1 - l_list.index(end_date)
+            return first_slice,last_slice
         except ValueError:
-            l_list.reverse()
-            return l_list[first_slice:]
+            return first_slice,len(l_list)
+            
     else:
-        return l_list[first_slice:]
-    
+        return first_slice,len(l_list)
 
 
 def main(ini):
@@ -531,6 +529,10 @@ def main(ini):
     interval = args.interval
     if args.bout_here != None:
         weather_location = args.bout_here
+    if args.num_output is None:
+        num_output = 64
+    else:
+        num_output = args.num_output
         
     # Add in new raw data
     for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
@@ -575,30 +577,35 @@ def main(ini):
             print ("Location not set in ini or commandline")
             exit()
         
+        # Selection of data to calculate and display
+        if args.start_date != None:
+            display_start,display_end = choose_date_slice(l_list,args.start_date,args.end_date)    
         
-        ##### TODO TODO TODO
-        ##### OH I FORGOT TO ADD IN THE PRIOR DATA AND THEN TRIM IT BACK OFF AGAIN 
-        ##### SO THERE AREN'T BLACK SPOTS AT THE BEGINNING OF THE SELECTED DATA
-        ##### THAT NEEDS TO HAPPEN HERE
+        if args.num_output != None:
+            display_start = (len(l_list) - num_output)
+            display_end = len(l_list)
         
-        if args.start_date is not None:
-            l_list = choose_date_slice(l_list,args.start_date,args.end_date)    
-        if args.num_output is not None:
-            scratch = (1 - args.num_output)
-            l_list = l_list[scratch:]
+        # Adjustment of data selection so that calculations go through properly
+        calc_start_adjust = 1
+        while calc_start_adjust < 64:
+            try:
+                scratch = l_list[display_start - calc_start_adjust][0]
+            except IndexError:
+                continue
+            else:
+                calc_start_adjust += 1
+        
         if to_verify == True:
-            verify_data(l_list)
+            l_list = verify_data(l_list[(display_start - calc_start_adjust):display_end])
         
+        l_list=calculate_data(l_list[(display_start - calc_start_adjust):display_end])
+        l_list=l_list[-calc_start_adjust:len(l_list)]
         
-        
-        l_list=calculate_data(l_list)
-
         if type_of_chart.find("show") != -1: 
             display_data(l_list)
         if type_of_chart.find("abs") != -1: 
             make_chart(l_list,"abs",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("sign") != -1: 
-            print("{0}".format(type_of_chart))
             make_chart(l_list,"sign",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("walk") != -1: 
             make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
