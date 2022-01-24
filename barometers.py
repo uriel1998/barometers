@@ -176,26 +176,27 @@ def verify_data(l_list):
     multiplier = 0
     l_list.sort()
     start_time = l_list[0][0]
-    
+    o_list=[]
     while multiplier < len(l_list):
         if multiplier > 0:  # first one goes through
-            now_time = int(input_list[multiplier][0])
-            expected = (start_time + (interval * multiplier))
-            if abs(now_time - expected) < tolerance: 
+            now_time = int(l_list[multiplier][0])
+            expected = int(start_time) + (int(interval) * int(multiplier))
+            if abs(now_time - expected) < int(tolerance): 
                 o_list.append(l_list[multiplier])
                 multiplier += 1                
             else:
                 if the_silence == False:
-                    print("Error found with timestamp {0}".format(l_list[count][0]))
+                    print("Error found with timestamp {0}".format(l_list[multiplier][0]))
                 if now_time > expected:     # there are missed readings. what we 
                                             # have is actually, start_time + (interval * (multiplier + 4))
                                             # So we are changing *expected time* until it matches actual time.
-                    submultiplier = multiplier # last accepted multiplier
+                    sub_multiplier = multiplier # last accepted multiplier
                     found_match = False
-                    while now_time > l_list[sub_multiplier][0]:   # so it aborts when hits current time
-                        sub_expected_time=(start_time + (interval * sub_multiplier))
-                        if (abs(now_time - sub_expected_time)) > tolerance:  # found where missed reading stops and is within tolerance
+                    sub_expected_time = int(start_time) + (int(interval) * int(sub_multiplier))
+                    while now_time > sub_expected_time:   # so it aborts when hits current time
+                        if (abs(now_time - sub_expected_time)) > int(tolerance):  # found where missed reading stops and is within tolerance
                             sub_multiplier += 1
+                            sub_expected_time += int(interval)
                             #check for end of list, and continue loop
                         else:
                             found_match = True
@@ -212,24 +213,23 @@ def verify_data(l_list):
                                         l_list[count-1][3],l_list[count-1][4],"†" ]
                                 o_list.append(fakerow)
                             o_list.append(l_list[multiplier])
-                            multiplier = sub_multiplier + 1 # getting everything even
+                            multiplier = sub_multiplier  # getting everything even
                 elif now_time < expected:     # current reading is too early but out of tolerance; 
-                                              # is there a good reading ahead of us? So we are incrementing the *row* until we find a good one
+                                            # is there a good reading ahead of us? So we are incrementing the *row* until we find a good one
+                    print("OHO")
                     submultiplier = multiplier
-                    submultiplier +=1
                     while submultiplier < len(l_list):
-                        try:
-                            test_time=int(input_list[submultiplier][0])
-                        except IndexError:
-                            continue
-                        
-                        if abs(expected - test_time) < tolerance:
+                        test_time=int(l_list[submultiplier][0])
+                        print ("{0}:{1}:{2}".format(expected,test_time,abs(expected - test_time)))
+                        if abs(expected - test_time) <= int(tolerance):
                             skipped_rows = submultiplier - multiplier
                             if the_silence == False:
                                 print("Found {0} extra rows before in-tolerance data found.".format(skipped_rows))
                             multiplier=submultiplier
-                            l.list[multiplier].append("‡")
+                            l_list[multiplier].append("‡")
                             o_list.append(l_list[multiplier])
+                            submultiplier = len(l_list)
+                        submultiplier += 1    
             multiplier += 1
         else:         
             # first row goes through
