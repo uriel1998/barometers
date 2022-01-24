@@ -322,9 +322,10 @@ def data_for_line_graph(l_times):
     """ Arrange line graph data and scale appropriately for size of chart  """
 
     my_points = []
-    for count in l_times:
+    count = 0
+    while count < len(l_times):
         my_points.append(int(l_times[count][4]))
-
+        count += 1
        
     my_range = max(my_points) - min(my_points)
     my_scalar = 0
@@ -335,9 +336,11 @@ def data_for_line_graph(l_times):
     my_min=min(my_points)
     my_plot = []
     
-    for count in my_points:
+    count = 0
+    while count < len(my_points):
         point=(512-(abs(my_max - my_points[count]) * my_scalar)) 
         my_plot.append(tuple([point,(count*8)]))  
+        count += 1
 
     return my_plot, my_max, my_min, my_range
 
@@ -431,7 +434,7 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
         if the_silence == False:
             print ("Creating line graph...")
         
-        points, val_max, val_min, val_range = data_for_my_graph(l_list)
+        points, val_max, val_min, val_range = data_for_line_graph(l_list)
         draw.line(points, width=5, fill="green", joint="curve")  
         range_string = "Max: {0} Min: {1} Range: {2}".format(val_max,val_min,val_range) 
         draw.text((100, 45), range_string, fill="white", font=font2, stroke_width=2, stroke_fill="black")
