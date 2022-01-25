@@ -165,35 +165,45 @@ def write_cache(weather_location,l_list):
 def verify_data(l_list):
     """ Ensuring the intervals in the sample are roughly equivalent """
     multiplier = 0
+    count = 0
     l_list.sort()
+    # Debatable - should I get closest 15 or 30 min increment? If I have to....
     start_time = l_list[0][0]
     o_list=[]
-    while multiplier < len(l_list):
+    while count < len(l_list):
         # Condition #1 - first one in dataset, automatically goes through
-        if multiplier > 0:  # first one goes through
-            now_time = int(l_list[multiplier][0])
+        if count = 0:  # first one goes through
+            o_list.append(l_list[count])
+            multiplier += 1
+            count += 1
+        else:
+            now_time = int(l_list[count][0])
             expected = int(start_time) + (int(interval) * int(multiplier))
             # Condition #2 - expected == actual +- tolerance
             if abs(now_time - expected) < int(tolerance): 
                 o_list.append(l_list[multiplier])
-                multiplier += 1                
+                multiplier += 1
+                count += 1                
             else:
-                if the_silence == False:
-                    print("Error found with timestamp {0}".format(l_list[multiplier][0]))
-                    #Condition #3 - the actual time is outside of tolerance, and lower than expected (too early)
-                    ## In this case, we have extra readings, most likely. (Or drift, but ugh)
-                    ## So maybe just skip this reading, append the correction mark to the prior reading?
+                #Outside of tolerance conditions
                 
-                
-                
-                
-                
-                    #Condition #4 - the actual time is outside of tolerance, and higher than expected (missed a reading)
-                    ## Does this ever match?
-                    ## That is:
-                    ### Before the next reading time
-                    #### Does this reading actually match at any point?
-                    ##### If so, how many missed readings were there?
+                #Condition #3 - the actual time is outside of tolerance, and lower than expected (too early)
+                ## In this case, we have extra readings
+                ## So skip this reading, append the correction mark to the prior reading
+                ### which is why row_count needs to be separate from multiplier 
+                if now_time < expected:
+                    if the_silence == False:
+                        print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[multiplier][0]))
+                    if o_list[-1][-1] =! "‡":
+                        o_list[-1].append("‡")
+                    count += 1
+            
+                #Condition #4 - the actual time is outside of tolerance, and higher than expected (missed a reading)
+                ## Does this ever match?
+                ## That is:
+                ### Before the next reading time
+                #### Does this reading actually match at any point?
+                ##### If so, how many missed readings were there?
                 
                     # Possibility - drifting. Shouldn't occur unless first data row is off.
                 
@@ -225,27 +235,8 @@ def verify_data(l_list):
                                 o_list.append(fakerow)
                             o_list.append(l_list[multiplier])
                             multiplier = sub_multiplier  # getting everything even
-                elif now_time < expected:     # current reading is too early but out of tolerance; 
-                                            # is there a good reading ahead of us? So we are incrementing the *row* until we find a good one
-                    print("OHO")
-                    submultiplier = multiplier
-                    while submultiplier < len(l_list):
-                        test_time=int(l_list[submultiplier][0])
-                        print ("{0}:{1}:{2}".format(expected,test_time,abs(expected - test_time)))
-                        if abs(expected - test_time) <= int(tolerance):
-                            skipped_rows = submultiplier - multiplier
-                            if the_silence == False:
-                                print("Found {0} extra rows before in-tolerance data found.".format(skipped_rows))
-                            multiplier=submultiplier
-                            l_list[multiplier].append("‡")
-                            o_list.append(l_list[multiplier])
-                            submultiplier = len(l_list)
-                        submultiplier += 1    
-            multiplier += 1
-        else:         
-            # first row goes through
-            o_list.append(l_list[multiplier])
-            multiplier += 1
+              
+
     o_list.sort
     return o_list
 
