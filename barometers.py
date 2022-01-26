@@ -4,8 +4,10 @@ import pathlib
 import linecache
 import configparser
 import requests
+import time
 import pickle, sys, string, argparse, datetime
 from PIL import Image, ImageDraw, ImageFont
+from datetime import date, datetime, timedelta
 
 # global variables
 appname = "barometers"
@@ -162,17 +164,40 @@ def write_cache(weather_location,l_list):
     pickle.dump(l_list,file)
     file.close()
 
+
+#https://stackoverflow.com/questions/48937900/round-time-to-nearest-hour-python#48938464
+def hour_rounder(t):
+    # Rounds to nearest hour by adding a timedelta hour if minute >= 30
+    return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
+               +timedelta(hours=t.minute//30))
+               
 def verify_data(l_list):
     """ Ensuring the intervals in the sample are roughly equivalent """
     multiplier = 0
     count = 0
     l_list.sort()
-    # Debatable - should I get closest 15 or 30 min increment? If I have to....
-    start_time = l_list[0][0]
+    
+    # The problem I am running into here is that if I have manually updated the 
+    # weather/pressure readings, it's sometimes thrown the verification off.
+    # So initial time is rounded to the closest hour, and then increment from there.
+    # https://www.epoch101.com/Python
+    
+    scratch_x = []
+    scratch_x.append(l_list[0][1].split("-"))
+    scratch_x.append(l_list[0][2].split(":"))
+    tuple(scratch_x)
+    scratch_y = datetime(scratch_x)
+    scratch_x = hour_rounder(scratch_y)
+    start_time = int(time.mktime(scratch_x.timetuple()))
+    #start_time = l_list[0][0]
+    
+    
+    
+    
     o_list=[]
     while count < len(l_list):
         # Condition #1 - first one in dataset, automatically goes through
-        if count = 0:  # first one goes through
+        if count == 0:  # first one goes through
             o_list.append(l_list[count])
             multiplier += 1
             count += 1
@@ -194,7 +219,7 @@ def verify_data(l_list):
                 if now_time < expected:
                     if the_silence == False:
                         print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[count][0]))
-                    if o_list[-1][-1] =! "‡":
+                    if o_list[-1][-1] != "‡":
                         o_list[-1].append("‡")
                     count += 1
             
@@ -493,7 +518,7 @@ def main(ini):
     # generic arguments
     parser.add_argument("-q", "--quiet", dest="quiet",action='store_true', default=False, help="Minimize output to STDOUT/STDERR")
     #adding arguments
-    parser.add_argument("-a", "--add-records", type=int, help="max number of records to add from input files", default=256,action='store',dest='num_input')
+    parser.add_argument("-a", "--add-records", type=int, help="Number of records to add from input files", default=0, action='store',dest='num_input')
     parser.add_argument("-r", "--retrieve-current", dest="get_data",action='store_true', default=False, help="Get reading from OpenWeatherMap")    
     parser.add_argument("-o", "--overwrite-cache", dest="cache_overwrite",action='store_true', default=False, help="Overwrite cache data when importing new data.")
     # choosing arguments
@@ -533,11 +558,12 @@ def main(ini):
     else:
         num_output = args.num_output
         
-    # Add in new raw data
-    for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
-        if the_silence == False:
-            print("Reading in {0}".format(rawfile))
-        read_in_file(rawfile,args.num_input)
+    if args.num_input != 0:
+        # Add in new raw data
+        for rawfile in list(cur_path.joinpath(cur_path.cwd(),'raw').iterdir()):    
+            if the_silence == False:
+                print("Reading in {0}".format(rawfile))
+            read_in_file(rawfile,args.num_input)
 
     if args.get_data == True:
         if weather_location is None:
