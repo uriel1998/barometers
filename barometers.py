@@ -196,61 +196,55 @@ def verify_data(l_list):
     
     o_list=[]
     while count < len(l_list):
-        # Condition #1 - first one in dataset, automatically goes through
-        if count == 0:  # first one goes through
-            o_list.append(l_list[count])
+        now_time = int(l_list[count][0])
+        expected = int(start_time) + (int(interval) * int(multiplier))
+        # Condition #1 - expected == actual +- tolerance
+        if abs(now_time - expected) < int(tolerance): 
+            o_list.append(l_list[multiplier])
             multiplier += 1
-            count += 1
+            count += 1                
         else:
-            now_time = int(l_list[count][0])
-            expected = int(start_time) + (int(interval) * int(multiplier))
-            # Condition #2 - expected == actual +- tolerance
-            if abs(now_time - expected) < int(tolerance): 
-                o_list.append(l_list[multiplier])
-                multiplier += 1
-                count += 1                
-            else:
-                #Outside of tolerance conditions
-                
-                #Condition #3 - the actual time is outside of tolerance, and lower than expected (too early)
-                ## In this case, we have extra readings
-                ## So skip this reading, append the correction mark to the prior reading
-                ### which is why row_count needs to be separate from multiplier 
-                if now_time < expected:
-                    if the_silence == False:
-                        print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[count][0]))
-                    if o_list[-1][-1] != "‡":
-                        o_list[-1].append("‡")
-                    count += 1
+            #Outside of tolerance conditions
             
-                #Condition #4 - the actual time is outside of tolerance, and higher than expected (missed a reading)
-                ## Does this ever match?
-                ## That is:
-                ### Increment expected until it hits (or exceeds) actual
-                #### Does this reading actually match at any point?
-                ##### If so, how many missed readings were there?
-                elif now_time > expected:
-                    if the_silence == False:
-                        print("Timestamp {0}: Out of tolerance, too late.".format(l_list[count][0]))
+            #Condition #2 - the actual time is outside of tolerance, and lower than expected (too early)
+            ## In this case, we have extra readings
+            ## So skip this reading, append the correction mark to the prior reading
+            ### which is why row_count needs to be separate from multiplier 
+            if now_time < expected:
+                if the_silence == False:
+                    print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[count][0]))
+                if o_list[-1][-1] != "‡":
+                    o_list[-1].append("‡")
+                count += 1
+        
+            #Condition #3 - the actual time is outside of tolerance, and higher than expected (missed a reading)
+            ## Does this ever match?
+            ## That is:
+            ### Increment expected until it hits (or exceeds) actual
+            #### Does this reading actually match at any point?
+            ##### If so, how many missed readings were there?
+            elif now_time > expected:
+                if the_silence == False:
+                    print("Timestamp {0}: Out of tolerance, too late.".format(l_list[count][0]))
 
-                    matched = False
-                    while now_time > expected and matched is False:
-                        multiplier += 1
-                        expected = int(start_time) + (int(interval) * int(multiplier))
-                        if abs(now_time - expected) < int(tolerance): 
-                            if the_silence == False:
-                                print("Found match after {0} rows.".format(multiplier - count))
-                            for x in range(count, multiplier - 1):
-                                ts = datetime.datetime.fromtimestamp(start_time + (x * interval))
-                                datestring = ts.strftime("%Y-%m-%d")
-                                timestring = ts.strftime("%H:%M")
-                                fakerow = [ str(start_time + (x * interval)),
-                                        datestring,timestring,
-                                        l_list[count-1][3],l_list[count-1][4],"†" ]
-                                o_list.append(fakerow)
-                            o_list.append(l_list[count])
-                            count = multiplier
-                            matched = True
+                matched = False
+                while now_time > expected and matched is False:
+                    multiplier += 1
+                    expected = int(start_time) + (int(interval) * int(multiplier))
+                    if abs(now_time - expected) < int(tolerance): 
+                        if the_silence == False:
+                            print("Found match after {0} rows.".format(multiplier - count))
+                        for x in range(count, multiplier - 1):
+                            ts = datetime.datetime.fromtimestamp(start_time + (x * interval))
+                            datestring = ts.strftime("%Y-%m-%d")
+                            timestring = ts.strftime("%H:%M")
+                            fakerow = [ str(start_time + (x * interval)),
+                                    datestring,timestring,
+                                    l_list[count-1][3],l_list[count-1][4],"†" ]
+                            o_list.append(fakerow)
+                        o_list.append(l_list[count])
+                        count = multiplier
+                        matched = True
 
     o_list.sort
     return o_list
