@@ -193,7 +193,7 @@ def verify_data(l_list):
                 ### which is why row_count needs to be separate from multiplier 
                 if now_time < expected:
                     if the_silence == False:
-                        print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[multiplier][0]))
+                        print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[count][0]))
                     if o_list[-1][-1] =! "‡":
                         o_list[-1].append("‡")
                     count += 1
@@ -201,41 +201,31 @@ def verify_data(l_list):
                 #Condition #4 - the actual time is outside of tolerance, and higher than expected (missed a reading)
                 ## Does this ever match?
                 ## That is:
-                ### Before the next reading time
+                ### Increment expected until it hits (or exceeds) actual
                 #### Does this reading actually match at any point?
                 ##### If so, how many missed readings were there?
-                
-                    # Possibility - drifting. Shouldn't occur unless first data row is off.
-                
-                
-                if now_time > expected:     # there are missed readings. what we 
-                                            # have is actually, start_time + (interval * (multiplier + 4))
-                                            # So we are changing *expected time* until it matches actual time.
-                    sub_multiplier = multiplier # last accepted multiplier
-                    found_match = False
-                    sub_expected_time = int(start_time) + (int(interval) * int(sub_multiplier))
-                    while now_time > sub_expected_time:   # so it aborts when hits current time
-                        if (abs(now_time - sub_expected_time)) > int(tolerance):  # found where missed reading stops and is within tolerance
-                            sub_multiplier += 1
-                            sub_expected_time += int(interval)
-                            #check for end of list, and continue loop
-                        else:
-                            found_match = True
+                elif now_time > expected:
+                    if the_silence == False:
+                        print("Timestamp {0}: Out of tolerance, too late.".format(l_list[count][0]))
+
+                    matched = False
+                    while now_time > expected and matched is False:
+                        multiplier += 1
+                        expected = int(start_time) + (int(interval) * int(multiplier))
+                        if abs(now_time - expected) < int(tolerance): 
                             if the_silence == False:
-                                print("Detected {0} missing rows; inserting duplicates of last approved row".format(sub_multiplier))
-                            # insert fake rows
-                            #TODO - make sure this doesn't overcount by 1
-                            for add_count in range (multiplier,sub_multiplier):
-                                ts = datetime.datetime.fromtimestamp(start_time + ((add_count + count) * interval))
+                                print("Found match after {0} rows.".format(multiplier - count))
+                            for x in range(count, multiplier - 1):
+                                ts = datetime.datetime.fromtimestamp(start_time + (x * interval))
                                 datestring = ts.strftime("%Y-%m-%d")
                                 timestring = ts.strftime("%H:%M")
-                                fakerow = [ str(start_time + ((add_count + count) * interval)),
+                                fakerow = [ str(start_time + (x * interval)),
                                         datestring,timestring,
                                         l_list[count-1][3],l_list[count-1][4],"†" ]
                                 o_list.append(fakerow)
-                            o_list.append(l_list[multiplier])
-                            multiplier = sub_multiplier  # getting everything even
-              
+                            o_list.append(l_list[count])
+                            count = multiplier
+                            matched = True
 
     o_list.sort
     return o_list
