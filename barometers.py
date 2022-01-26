@@ -182,15 +182,12 @@ def verify_data(l_list):
     # So initial time is rounded to the closest hour, and then increment from there.
     # https://www.epoch101.com/Python
     
-    scratch_x = []
-    scratch_x.append(l_list[0][1].split("-"))
-    scratch_x.append(l_list[0][2].split(":"))
-    tuple(scratch_x)
-    scratch_y = datetime(scratch_x)
-    scratch_x = hour_rounder(scratch_y)
+    scratch_x = "{0} {1}".format(l_list[0][1],l_list[0][2])
+    dt_object = datetime.strptime(scratch_x, '%Y-%m-%d %H:%M')
+    scratch_x = hour_rounder(dt_object)
     start_time = int(time.mktime(scratch_x.timetuple()))
     #start_time = l_list[0][0]
-    
+    print("{0}".format(start_time))
     
     
     
@@ -222,7 +219,8 @@ def verify_data(l_list):
             ## That is:
             ### Increment expected until it hits (or exceeds) actual
             #### Does this reading actually match at any point?
-            ##### If so, how many missed readings were there?
+            ##### If so, how many missed readings were there?  
+            #TODO - this is not working correctly and giving too many missed readings.
             elif now_time > expected:
                 if the_silence == False:
                     print("Timestamp {0}: Out of tolerance, too late.".format(l_list[count][0]))
