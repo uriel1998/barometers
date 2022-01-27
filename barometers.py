@@ -398,19 +398,18 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
     y = 0
     for row in l_list:
         if type_of_chart.find("walk") != -1: # doing it this way means one variable
-            the_index = 5                    # four possible conditions
+            the_index = 6                    # four possible conditions
         else:
-            the_index = 6
+            the_index = 5
             
         x_counter = 0      
-        print("{0}".format(row[the_index]))
-        for this_value in row[the_index]:
+        
+        for lsub_counter in range(len(row[the_index])):
             
             if type_of_chart.find("abs") != -1:       ### why am I not seeing this?
-                this_value = abs(this_value)
+                this_value = abs(row[the_index][lsub_counter])
             else:
-                this_value = int(this_value)
-               
+                this_value = row[the_index][lsub_counter]
             if scheme == "wide":
                 fill_color = _my_colors_wide.get(this_value, (254, 255, 255))
             elif scheme == "superwide":
@@ -553,8 +552,9 @@ def main(ini):
             if the_silence == False:
                 print("Reading in {0}".format(rawfile))
             read_in_file(rawfile,args.num_input)
-
-    if args.get_data == True:
+    
+    #TODO - test retrieval
+    if args.get_data == True: 
         if weather_location is None:
             print ("Location not set in ini or commandline")
         else:
