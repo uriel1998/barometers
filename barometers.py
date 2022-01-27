@@ -583,7 +583,7 @@ def main(ini):
     if args.walking == True:
         type_of_chart = type_of_chart + "walk"
     
-
+#TODO - it seems like it's selecting earlier data than I want?
     if len(type_of_chart) > 0:  
         if weather_location is not None:
             l_list = match_cache(weather_location)
