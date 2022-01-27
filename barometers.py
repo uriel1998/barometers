@@ -187,10 +187,6 @@ def verify_data(l_list):
     scratch_x = hour_rounder(dt_object)
     start_time = int(time.mktime(scratch_x.timetuple()))
     #start_time = l_list[0][0]
-    print("{0}".format(start_time))
-    
-    
-    
     o_list=[]
     while count < len(l_list):
         
@@ -210,7 +206,7 @@ def verify_data(l_list):
             ### which is why row_count needs to be separate from multiplier 
             if now_time < expected:
                 if the_silence == False:
-                    print("Timestamp {0}: Outside of tolerance, too early, skipping.".format(l_list[count][0]))
+                    print("Timestamp {0}: Outside of tolerance, too early, (expected {1}).".format(l_list[count][0],expected))
                 if o_list[-1][-1] != "‡":
                     o_list[-1].append("‡")
                 count += 1
@@ -232,15 +228,12 @@ def verify_data(l_list):
                                
                     if abs(now_time - expected) < int(tolerance): 
                         if the_silence == False:
-                            print("Found match after {0} rows.".format(multiplier - start_multiplier)) 
-                            print ("{0} : {1}".format(start_multiplier,multiplier)) 
-                        ### SO it chokes if the range is only one, got it.
-                        # TODO: Fix that.
+                            print("Found match after {0} rows; inserting placeholder(s).".format(multiplier - start_multiplier)) 
                         for x in range(start_multiplier,multiplier):
-                            ts = datetime.datetime.fromtimestamp(start_time + (x * interval))
+                            ts = datetime.fromtimestamp(start_time + (int(x) * int(interval)))
                             datestring = ts.strftime("%Y-%m-%d")
                             timestring = ts.strftime("%H:%M")
-                            fakerow = [ str(start_time + (x * interval)),
+                            fakerow = [ str(start_time + (int(x) * int(interval))),
                                     datestring,timestring,
                                     l_list[count-1][3],l_list[count-1][4],"†" ]
                             o_list.append(fakerow)
@@ -257,7 +250,6 @@ def calculate_data(l_list):
     if the_silence == False:
         print("Performing calculations...")
     count = 0
-    print("{0}".format(len(l_list)))    
     while count < len(l_list):
         autohealed = " "
         if "‡" in l_list[count]:
@@ -288,7 +280,6 @@ def calculate_data(l_list):
         l_list[count].insert(6,tuple(walk_calc)) 
         l_list[count].insert(7,autohealed)
         count += 1
-    print("sd {0}".format(len(l_list)))
     return l_list
 
 
@@ -411,8 +402,10 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
         else:
             the_index = 6
             
-        x_counter = 0        
+        x_counter = 0      
+        print("{0}".format(row[the_index]))
         for this_value in row[the_index]:
+            
             if type_of_chart.find("abs") != -1:       ### why am I not seeing this?
                 this_value = abs(this_value)
             else:
@@ -604,6 +597,10 @@ def main(ini):
         elif args.num_output != None:
             display_start = (len(l_list) - num_output)
             display_end = len(l_list)
+        else:
+            display_start = (len(l_list) - 64)
+            display_end = len(l_list)
+
 
         # Adjustment of data selection so that calculations go through properly
         calc_start_adjust = 1
