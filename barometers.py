@@ -118,6 +118,7 @@ def read_in_file(in_file,num_input=256):
             else:
                 if len(l_list) != 0:
                     c1=0
+                    #TODO - I was too clever here,maybe, and am deleting from adding list at the same time
                     while c1 < len(l_list):  # we are numerically looping so we can remove entries
                         if int(l_list[c1][0]) == int(list_to_add[0]):
                             if cache_overwrite == True:
@@ -152,8 +153,6 @@ def write_cache(weather_location,l_list):
     except FileNotFoundError:
         if the_silence == False: 
             print ("Creating new cache {0}".format(cache_file))
-    #TODO - Change from pickle to just writing lines of text and reading them. 
-    #TODO - Pickling isn't helping size matters, and is making debugging here VERY hard
     file = open(cache_filename, 'wb')
     pickle.dump(l_list,file)
     file.close()
@@ -504,7 +503,7 @@ def main(ini):
     parser.add_argument("-s", "--scheme", dest="scheme",action='store', default=None, help="Color scheme - default, wide, alt, original")
     # verification arguments
     parser.add_argument('-v', '--verify', dest='to_verify', action='store_true', default=False,help="Verify interval ranges")
-    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance', default="300",help="Acceptable range in seconds, only makes sense with -v")
+    parser.add_argument('-t', '--tolerance', action='store',dest='tolerance', default="600",help="Acceptable range in seconds, only makes sense with -v")
     parser.add_argument('-i', '--interval', action='store',dest='interval', default="1800",help="Expected interval in seconds, only makes sense with -v")    
     # output arguments
     parser.add_argument('-F', '--font', action='store',dest='font', default=None,help="Path to TTF/OTF font if desired")
@@ -600,10 +599,13 @@ def main(ini):
             else:
                 calc_start_adjust += 1
         print("B From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
+        display_data(l_list)
         if to_verify == True:
             l_list = verify_data(l_list[(display_start - calc_start_adjust):display_end])
         print("C From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
+        display_data(l_list)
         l_list=calculate_data(l_list[(display_start - calc_start_adjust):display_end])
+        display_data(l_list)
         print("D From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
         l_list=l_list[calc_start_adjust:len(l_list)]
         
@@ -625,3 +627,5 @@ if __name__ == '__main__':
     main(ini_file)
 else:
     print("barometers loaded as a module")
+#TODO - verify is clobbering everything after the 16th, why??????????
+#TODO - maybe a first pass to remove the dupes first on read-in, is that what's going on????
