@@ -235,7 +235,7 @@ def verify_data(l_list):
 
 def calculate_data(l_list):
     """ Calculating the data for the passed in dataset.  """
-    print("{0}".format(len(l_list)))
+
     if the_silence == False:
         print("Performing calculations...")
     count = 0
@@ -269,7 +269,7 @@ def calculate_data(l_list):
         l_list[count].insert(6,tuple(walk_calc)) 
         l_list[count].insert(7,autohealed)
         count += 1
-    print("{0}".format(len(l_list)))
+
     return l_list
 
 
@@ -302,8 +302,8 @@ def get_range(l_list,l_position):
     for l_object in ll_list:
         if int(max(l_object)) > l_max:
             l_max = int(max(l_object))
-        if int(min(l_object)) > l_max:
-            l_max = int(max(l_object))
+        if int(min(l_object)) < l_min:
+            l_min = int(min(l_object))
         if (l_max - l_min) > l_range:
             l_range = (l_max - l_min)
         if abs(l_max - l_min) > l_abs_range:
@@ -342,7 +342,6 @@ def data_for_line_graph(l_times):
 def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
     """ Create charts of a passed in slice of the dataset """
     
-    print("{0}".format(len(l_list)))
     
     #look for font in cwd
     
@@ -364,17 +363,17 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
     draw = ImageDraw.Draw(my_image)
     duration_string = "From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2])
     if type_of_chart.find("walk") != -1:
-        chart_range, chart_abs_range = get_range(l_list,5)
-    else:
         chart_range, chart_abs_range = get_range(l_list,6)
+    else:
+        chart_range, chart_abs_range = get_range(l_list,5)
     
     if scheme == None:
         scheme = "auto"
-        
+    
     if scheme == "auto":  # There is probably a more clever way to do this, but...
-        if chart_range < 12 and chart_abs_range < 24:
+        if chart_range < 11 and chart_abs_range < 23:
             scheme = "autoscale1"
-        elif chart_range < 24 and chart_abs_range < 48:            
+        elif chart_range < 23 and chart_abs_range < 47:            
             scheme = "autoscale2"
         elif chart_range < 37 and chart_abs_range < 73:
             scheme = "autoscale3"           
@@ -432,10 +431,6 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             draw.line(points, width=10, fill="green", joint="curve")  
         else:
             draw.line(points, width=10, fill="black", joint="curve")  
-
-
-
-
 
         range_string = "Max: {0} Min: {1} Range: {2}".format(val_max,val_min,val_range) 
         draw.text((100, 45), range_string, fill="white", font=font2, stroke_width=2, stroke_fill="black")
@@ -584,7 +579,6 @@ def main(ini):
             print ("Location not set in ini or commandline")
             exit()
         
-        #print("From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))        
         # Selection of data to calculate and display
         if args.num_output != None:
             display_start = (len(l_list) - num_output)
@@ -610,7 +604,6 @@ def main(ini):
             l_list = verify_data(l_list[(display_start - calc_start_adjust):display_end])
             display_start = calc_start_adjust + 1
             display_end = len(l_list)
-            
 
         l_list=calculate_data(l_list[(display_start - calc_start_adjust):display_end])
         l_list=l_list[calc_start_adjust:len(l_list)]
