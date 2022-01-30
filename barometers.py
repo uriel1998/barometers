@@ -237,7 +237,7 @@ def verify_data(l_list):
 
 def calculate_data(l_list):
     """ Calculating the data for the passed in dataset.  """
-
+    print("{0}".format(len(l_list)))
     if the_silence == False:
         print("Performing calculations...")
     count = 0
@@ -271,6 +271,7 @@ def calculate_data(l_list):
         l_list[count].insert(6,tuple(walk_calc)) 
         l_list[count].insert(7,autohealed)
         count += 1
+    print("{0}".format(len(l_list)))
     return l_list
 
 
@@ -574,7 +575,7 @@ def main(ini):
             print ("Location not set in ini or commandline")
             exit()
         
-        print("From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))        
+        #print("From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))        
         # Selection of data to calculate and display
         if args.num_output != None:
             display_start = (len(l_list) - num_output)
@@ -586,7 +587,6 @@ def main(ini):
         if args.start_date != None:
             display_start,display_end = choose_date_slice(l_list,args.start_date,args.end_date)    
 
-        print("From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
         # Adjustment of data selection so that calculations go through properly
         calc_start_adjust = 1
         while calc_start_adjust < 64:
@@ -596,19 +596,19 @@ def main(ini):
                 continue
             else:
                 calc_start_adjust += 1
-        print("B From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
-        display_data(l_list)
+        
         if to_verify == True:
             l_list = verify_data(l_list[(display_start - calc_start_adjust):display_end])
-        print("C From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
-        display_data(l_list)
+            display_start = calc_start_adjust + 1
+            display_end = len(l_list)
+            
+
         l_list=calculate_data(l_list[(display_start - calc_start_adjust):display_end])
-        display_data(l_list)
-        print("D From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
         l_list=l_list[calc_start_adjust:len(l_list)]
-        
-        print("E From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
-        print("{0} : {1} : {2}".format(display_start,display_end, len(l_list)))
+
+        if the_silence == False:
+            print("From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
+
         if type_of_chart.find("show") != -1: 
             display_data(l_list)
         if type_of_chart.find("abs") != -1: 
