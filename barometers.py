@@ -185,9 +185,10 @@ def verify_data(l_list):
         
         now_time = int(l_list[count][0])
         expected = int(start_time) + (int(interval) * int(multiplier))
+        print("{0} : {1} - {2}:{3}".format(count,multiplier, now_time,expected))
         # Condition #1 - expected == actual +- tolerance
-        if abs(now_time - expected) < int(tolerance): 
-            o_list.append(l_list[multiplier])
+        if abs(now_time - expected) < int(tolerance):            
+            o_list.append(l_list[count])
             multiplier += 1
             count += 1                
         else:
@@ -203,7 +204,7 @@ def verify_data(l_list):
                 if o_list[-1][-1] != "‡":
                     o_list[-1].append("‡")
                 count += 1
-        
+                print("{0} : {1} ".format(count,multiplier))
             #Condition #3 - the actual time is outside of tolerance, and higher than expected (missed a reading)
             ## Does this ever match?
             ## That is:
@@ -215,6 +216,7 @@ def verify_data(l_list):
                     print("Timestamp {0}: Out of tolerance, too late (expected {1}).".format(l_list[count][0],expected))
                 start_multiplier = multiplier
                 matched = False
+                print("{0} : {1} : {2} ".format(count,multiplier,start_multiplier))
                 while now_time > expected and matched is False:
                     multiplier += 1
                     expected = int(start_time) + (int(interval) * int(multiplier))
@@ -222,6 +224,7 @@ def verify_data(l_list):
                     if abs(now_time - expected) < int(tolerance): 
                         if the_silence == False:
                             print("Found match after {0} rows; inserting placeholder(s).".format(multiplier - start_multiplier)) 
+                            print("{0} : {1} : {2} ".format(count,multiplier,start_multiplier))
                         for x in range(start_multiplier,multiplier):
                             ts = datetime.fromtimestamp(start_time + (int(x) * int(interval)))
                             datestring = ts.strftime("%Y-%m-%d")
@@ -233,7 +236,15 @@ def verify_data(l_list):
                         o_list.append(l_list[count])
                         count = (count + (multiplier - start_multiplier))
                         matched = True
-                    
+                        multiplier += 1
+                        print("{0} : {1} : {2} ".format(count,multiplier,start_multiplier))
+                        
+                        #ROW is at 254
+                        #ROW should be at 255
+                        #FAKE goes in 254
+                        #ROW goes in 255
+                        #COUNT restarts at 255 with MULTIPLIER at 256
+                        
     o_list.sort
     return o_list
 
