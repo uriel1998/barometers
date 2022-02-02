@@ -379,7 +379,9 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             scheme = "autoscale3"           
         elif chart_range < 46 and chart_abs_range < 90:
             scheme = "autoscale4"
-
+        else:
+            scheme = "autoscale4"
+    print ("{0} : {1}".format(chart_range,chart_abs_range))
     if the_silence == False: 
         print ("Creating chart with {0} colorscheme...".format(scheme))
     
@@ -416,7 +418,10 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             x = (x_counter * 8) + 40
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
-        timestring = str(row[2]) + str(row[7])  # autoheal marker    
+        sum1 = sum(row[the_index][0:8])
+        sum2 = sum(row[the_index][0:16])
+        sum3 = sum(row[the_index][0:32])
+        timestring = str(row[2]) + str(row[7]) + " " + str(sum1) + ":" + str(sum2) + ":" + str(sum3) # autoheal marker  
         draw.text((5, y), str(timestring), fill="white", font=font)
         y += 8
 # now is for linegraph overlay
