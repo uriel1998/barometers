@@ -333,7 +333,7 @@ def data_for_line_graph(l_times):
     count = 0
     while count < len(my_points):
         point=(512-(abs(my_max - my_points[count]) * my_scalar)) 
-        my_plot.append(tuple([point,(count*8)]))  
+        my_plot.append(tuple([point,(count*8)+5]))  
         count += 1
 
     return my_plot, my_max, my_min, my_range
@@ -431,11 +431,11 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
         
         points, val_max, val_min, val_range = data_for_line_graph(l_list)
         if scheme == "original":
-            draw.line(points, width=10, fill="green", joint="curve")  
+            draw.line(points, width=5, fill="green", joint="curve")  
         elif scheme == "alt":
-            draw.line(points, width=10, fill="green", joint="curve")  
+            draw.line(points, width=5, fill="green", joint="curve")  
         else:
-            draw.line(points, width=10, fill="black", joint="curve")  
+            draw.line(points, width=5, fill="black", joint="curve")  
 
         range_string = "Max: {0} Min: {1} Range: {2}".format(val_max,val_min,val_range) 
         draw.text((100, 45), range_string, fill="white", font=font2, stroke_width=2, stroke_fill="black")
