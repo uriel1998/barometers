@@ -219,10 +219,14 @@ in any way.
 
 - If the start date is given (in YYYY-mm-dd format), and the end date is set, it 
   will show between those dates inclusive (or to the end of the file).
+  
 - If the start date is given and the number of records is set, it will show from 
   beginning of the start date and show that many records (or to the end of the file).
+  
 - If the start date is given and no other criteria given, it will show from the 
   beginning of the start date to the end of the data.  
+  
+
 ```
 -B BOUT_HERE, --bout-here BOUT_HERE			Where to output/input weather location from. 
 											Also selects which cache file to use.
@@ -231,6 +235,7 @@ in any way.
 											optional, only makes sense with --begin-date.
 -d NUM_OUTPUT, --display-records NUM_OUTPUT	Number of records to display
 ```
+
 ### Verification of Data
 
 Verification is done on the data selected for output/display.  Defaults are 1800 seconds/300 seconds, respectively.
