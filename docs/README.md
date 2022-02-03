@@ -293,15 +293,15 @@ Console output for `display data`: `examples/dump_output.txt`
 
 Console output for `display data` with `load` enabled: `examples/load_output.txt`
 
-Chart output of the same time period, all using the auto color scale, showing the difference in signed, abs, and walking charts:
+Chart output of the same time period, all using the auto color scale, showing the difference in signed, abs, and walking charts respectively:
 
-![](/home/steven/documents/programming/barometers/examples/out_signed.png)
+![](https://i.imgur.com/Z3nfmVe.png)
 
 ![](https://i.imgur.com/pqEVciw.png)
 
 ![](https://i.imgur.com/ZHs7gEj.png)
 
-Chart output of the same time period showing the default, original, alt, and auto color scales:
+Chart output of the same time period showing the default, original, alt, and auto color scales in that order:
 
 ![](https://i.imgur.com/INRfGWi.png)
 
