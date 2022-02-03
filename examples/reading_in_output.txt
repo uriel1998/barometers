@@ -1,0 +1,71 @@
+Reading in /home/steven/documents/programming/barometers/raw/4509884.txt
+No cache exists for location /home/steven/documents/programming/barometers/cache/4509884
+Timestamp 1629752435: Out of tolerance, too late (expected 1629747000).
+Found match after 3 rows; inserting placeholder(s).
+Timestamp 1629757832: Out of tolerance, too late (expected 1629754200).
+Found match after 2 rows; inserting placeholder(s).
+Timestamp 1629761443: Out of tolerance, too late (expected 1629759600).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1636108229: Out of tolerance, too late (expected 1636106400).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1636194629: Out of tolerance, too late (expected 1636192800).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1636281030: Out of tolerance, too late (expected 1636279200).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1636806630: Out of tolerance, too late (expected 1636804800).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1637145027: Out of tolerance, too late (expected 1637143200).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1638009028: Out of tolerance, too late (expected 1638007200).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1638397829: Out of tolerance, too late (expected 1638374400).
+Found match after 13 rows; inserting placeholder(s).
+Timestamp 1638421250: Out of tolerance, too late (expected 1638399600).
+Found match after 12 rows; inserting placeholder(s).
+Timestamp 1638442830: Out of tolerance, too late (expected 1638423000).
+Found match after 11 rows; inserting placeholder(s).
+Timestamp 1638462629: Out of tolerance, too late (expected 1638444600).
+Found match after 10 rows; inserting placeholder(s).
+Timestamp 1638480629: Out of tolerance, too late (expected 1638464400).
+Found match after 9 rows; inserting placeholder(s).
+Timestamp 1638496829: Out of tolerance, too late (expected 1638482400).
+Found match after 8 rows; inserting placeholder(s).
+Timestamp 1638511230: Out of tolerance, too late (expected 1638498600).
+Found match after 7 rows; inserting placeholder(s).
+Timestamp 1638523827: Out of tolerance, too late (expected 1638513000).
+Found match after 6 rows; inserting placeholder(s).
+Timestamp 1638534629: Out of tolerance, too late (expected 1638525600).
+Found match after 5 rows; inserting placeholder(s).
+Timestamp 1638543628: Out of tolerance, too late (expected 1638536400).
+Found match after 4 rows; inserting placeholder(s).
+Timestamp 1638550828: Out of tolerance, too late (expected 1638545400).
+Found match after 3 rows; inserting placeholder(s).
+Timestamp 1638556228: Out of tolerance, too late (expected 1638552600).
+Found match after 2 rows; inserting placeholder(s).
+Timestamp 1638559828: Out of tolerance, too late (expected 1638558000).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1638786628: Out of tolerance, too late (expected 1638784800).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1639477828: Out of tolerance, too late (expected 1639476000).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1640169027: Out of tolerance, too late (expected 1640167200).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1640255427: Out of tolerance, too late (expected 1640253600).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1640341828: Out of tolerance, too late (expected 1640340000).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1640514628: Out of tolerance, too late (expected 1640512800).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1640831430: Out of tolerance, too late (expected 1640827800).
+Found match after 2 rows; inserting placeholder(s).
+Timestamp 1640835028: Out of tolerance, too late (expected 1640833200).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1642784428: Out of tolerance, too late (expected 1642780800).
+Found match after 2 rows; inserting placeholder(s).
+Timestamp 1642788029: Out of tolerance, too late (expected 1642786200).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1643241601: Out of tolerance, too late (expected 1643239800).
+Found match after 1 rows; inserting placeholder(s).
+Timestamp 1643484602: Out of tolerance, too late (expected 1643482800).
+Found match after 1 rows; inserting placeholder(s).
+Creating new cache /home/steven/documents/programming/barometers/cache/4509884

@@ -229,7 +229,7 @@ def verify_data(l_list):
                         if the_silence == False:
                             print("Found match after {0} rows; inserting placeholder(s).".format(multiplier - start_multiplier)) 
                         for x in range(start_multiplier,multiplier):
-                            ts = datetime.fromtimestamp(start_time + (int(x) * int(interval)))
+                            ts = datetime.datetime.fromtimestamp(start_time + (int(x) * int(interval)))
                             datestring = ts.strftime("%Y-%m-%d")
                             timestring = ts.strftime("%H:%M")
                             fakerow = [ str(start_time + (int(x) * int(interval))),
@@ -535,7 +535,7 @@ def main(ini):
     parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None,help="Provide the start date for chart or calculation data.")
     parser.add_argument("-e", "--end-date", dest="end_date", action='store', default=None,help="Provide the end date for chart or calculation data; optional, only makes sense with --begin-date.")
     parser.add_argument("-d", "--display-records", type=int, help="number of records back to display", default=None,action='store',dest='num_output')
-    parser.add_argument("-s", "--scheme", dest="scheme",action='store', default=None, help="Color scheme - default, wide, alt, original")
+    parser.add_argument("-s", "--scheme", dest="scheme",action='store', default=None, help="Color scheme - default, auto, alt, original")
     # verification arguments
     parser.add_argument('-v', '--verify', dest='to_verify', action='store_true', default=False,help="Verify interval ranges")
     parser.add_argument('-t', '--tolerance', action='store',dest='tolerance', default="600",help="Acceptable range in seconds, only makes sense with -v")
@@ -663,9 +663,12 @@ def main(ini):
             sum1 = str(sum(l_list[-1][5][0:8]))
             sum2 = str(sum(l_list[-1][5][0:16]))
             sum3 = str(sum(l_list[-1][5][0:32]))
-            timestring = str(l_list[-1][1]) + " @ " + str(l_list[-1][2]) + ": " + sum1.rjust(3," ") + ":" + sum2.rjust(3," ") + ":" + sum3.rjust(3," ") 
-            print("{0}".format(timestring))
-            
+            sumload = sum1.rjust(3," ") + ":" + sum2.rjust(3," ") + ":" + sum3.rjust(3," ") 
+            wsum1 = str(sum(l_list[-1][6][0:8]))
+            wsum2 = str(sum(l_list[-1][6][0:16]))
+            wsum3 = str(sum(l_list[-1][6][0:32]))
+            walkload = wsum1.rjust(3," ") + ":" + wsum2.rjust(3," ") + ":" + wsum3.rjust(3," ") 
+            print("{0} @ {1}: load: {2} w_load: {3} in:{4} hPa:{5} epoch:{6}".format(l_list[-1][1],l_list[-1][2],sumload,walkload,l_list[-1][3],l_list[-1][4],l_list[-1][0] ))            
     else:
         exit()
 
