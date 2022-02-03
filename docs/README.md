@@ -6,7 +6,7 @@ barometers
 
 * `barometers.py` - Produce graphs and various charts of historical barometric data for a location to aid in visualization of pressure changes quickly for (possible) prediction of health effects from the change in weather pressure.  
 
-* Quickstart:  Install Python (tested with v3.9.9).  Clone/download this repository. Get an API key from OpenWeatherMap.  Run the program once every half hour from a scheduled task or as a cron job.  After you've collected enough data, start outputting graphs or the "barometric load".
+* Quickstart:  Install [Python (tested with v3.9.9)](https://www.python.org/downloads/) and [the PIL library](https://pillow.readthedocs.io/en/stable/installation.html).  Clone/download this repository. Get an [API key from OpenWeatherMap](http://openweathermap.org/appid).  Run the program once every half hour from a scheduled task or as a cron job.  After you've collected enough data, start outputting graphs or the "barometric load".
 
 * To see the differences the calculations and color schemes make with data, skip down to the Examples section.
 
