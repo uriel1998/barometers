@@ -16,6 +16,7 @@ appauthor = "Steven Saus"
 the_silence = False
 cache_overwrite = False
 to_verify = False
+show_load = False
 tolerance = 0
 interval = 0 
 cur_path = pathlib.Path()
@@ -381,7 +382,7 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             scheme = "autoscale4"
         else:
             scheme = "autoscale4"
-    print ("{0} : {1}".format(chart_range,chart_abs_range))
+    
     if the_silence == False: 
         print ("Creating chart with {0} colorscheme...".format(scheme))
     
@@ -418,10 +419,14 @@ def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
             x = (x_counter * 8) + 40
             draw.rectangle((x, y, x + 8, y + 8), fill=(fill_color) , outline=None)
             x_counter += 1
-        sum1 = sum(row[the_index][0:8])
-        sum2 = sum(row[the_index][0:16])
-        sum3 = sum(row[the_index][0:32])
-        timestring = str(row[2]) + str(row[7]) + " " + str(sum1) + ":" + str(sum2) + ":" + str(sum3) # autoheal marker  
+        if show_load == True:
+            sum1 = sum(row[the_index][0:8])
+            sum2 = sum(row[the_index][0:16])
+            sum3 = sum(row[the_index][0:32])
+            timestring = str(row[2]) + str(row[7]) + " " + str(sum1) + ":" + str(sum2) + ":" + str(sum3) # autoheal marker              
+        else:
+            timestring = str(row[2]) + str(row[7]) # autoheal marker  
+            
         draw.text((5, y), str(timestring), fill="white", font=font)
         y += 8
 # now is for linegraph overlay
@@ -485,6 +490,7 @@ def main(ini):
     global to_verify   
     global tolerance
     global interval
+    global show_load
     
     config = configparser.ConfigParser()
     try:
@@ -517,6 +523,8 @@ def main(ini):
     parser.add_argument('-F', '--font', action='store',dest='font', default=None,help="Path to TTF/OTF font if desired")
     parser.add_argument('-f', '--file', action='store',dest='fn_stem', default="out",help="Stem for output filename, defaults to out_[abs|signed].png")
     parser.add_argument("-w", "--walk_about", dest="walkabout",action='store_true', default=False, help="Modify walking chart by distance from present")
+    parser.add_argument("-l", "--load", dest="load",action='store_true', default=False, help="Show <<load>> calculations in selected output")
+
     # type of output arguments
     parser.add_argument("-D", "--show-data", dest="showdata",action='store_true', default=False, help="Show data of range on stdout")
     parser.add_argument("-L", "--line-graph", dest="linegraph",action='store_true', default=False, help="Produce line graph overlay")
@@ -568,6 +576,9 @@ def main(ini):
             write_cache(weather_location,l_list)
     
     type_of_chart = ""
+    if args.load is True:
+        show_load = True
+        type_of_chart = type_of_chart + "load"
     if args.showdata == True:
         type_of_chart = type_of_chart + "show"
     if args.signval == True:
@@ -624,7 +635,13 @@ def main(ini):
             make_chart(l_list,"sign",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("walk") != -1: 
             make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
-
+        if show_load == True:
+            sum1 = str(sum(l_list[-1][5][0:8]))
+            sum2 = str(sum(l_list[-1][5][0:16]))
+            sum3 = str(sum(l_list[-1][5][0:32]))
+            timestring = str(l_list[-1][1]) + " @ " + str(l_list[-1][2]) + ": " + sum1.rjust(3," ") + " " + sum2.rjust(3," ") + " " + sum3.rjust(3," ") 
+            print("{0}".format(timestring))
+            
     else:
         exit()
 
