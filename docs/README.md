@@ -246,9 +246,10 @@ Verification is done on the data selected for output/display.  Defaults are 1800
 ```
 ### Specifying the Output of Data
 
-* Line graph time values match the Y-axis; the X-axis auto-scales to fit the generated chart.
-* "Auto" attempts to maintain a roughly consistent color scale
-* If **load** calculations are specified by themselves, it will output *only* the most recent load calculations to STDOUT.  
+- Line graph time values match the Y-axis; the X-axis auto-scales to fit the generated chart.
+- "Auto" attempts to maintain a roughly consistent color scale
+- If **load** calculations are specified by themselves, it will output *only* the most recent load calculations to STDOUT. 
+
 ```
 -s SCHEME, --scheme SCHEME	Color scheme - default, auto alt, original
 -F FONT, --font FONT  		Path to TTF/OTF font if desired. Defaults to Arial
