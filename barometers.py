@@ -158,11 +158,18 @@ def write_cache(weather_location,l_list):
     file.close()
 
 
-#https://stackoverflow.com/questions/48937900/round-time-to-nearest-hour-python#48938464
-def hour_rounder(t):
-    # Rounds to nearest hour by adding a timedelta hour if minute >= 30
-    return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
-               +timedelta(hours=t.minute//30))
+               
+def roundTime(dt=None, roundTo=30):
+   """Round a datetime object to any time lapse in seconds
+   dt : datetime.datetime object, default now.
+   roundTo : Closest number of seconds to round to, default 1 minute.
+   Author: Thierry Husson 2012 - Use it as you want but don't blame me.
+   """
+   if dt == None : dt = datetime.datetime.now()
+   seconds = (dt.replace(tzinfo=None) - dt.min).seconds
+   rounding = (seconds+roundTo/2) // roundTo * roundTo
+   return dt + datetime.timedelta(0,rounding-seconds,-dt.microsecond)
+               
                
 def verify_data(l_list):
     """ Ensuring the intervals in the sample are roughly equivalent """
@@ -176,8 +183,9 @@ def verify_data(l_list):
     # https://www.epoch101.com/Python
     
     scratch_x = "{0} {1}".format(l_list[0][1],l_list[0][2])
-    dt_object = datetime.strptime(scratch_x, '%Y-%m-%d %H:%M')
-    scratch_x = hour_rounder(dt_object)
+    dt_object = datetime.datetime.strptime(scratch_x, '%Y-%m-%d %H:%M')
+    
+    scratch_x = roundTime(dt_object)
     start_time = int(time.mktime(scratch_x.timetuple()))
     #start_time = l_list[0][0]
     o_list=[]
@@ -280,7 +288,19 @@ def display_data(l_list):
     
     row = 0
     while row < len(l_list):
-        print ("{0}".format(l_list[row]))
+        if show_load == True:
+            sum1 = str(sum(l_list[row][5][0:8]))
+            sum2 = str(sum(l_list[row][5][0:16]))
+            sum3 = str(sum(l_list[row][5][0:32]))
+            sumload = sum1.rjust(3," ") + ":" + sum2.rjust(3," ") + ":" + sum3.rjust(3," ") 
+            wsum1 = str(sum(l_list[row][6][0:8]))
+            wsum2 = str(sum(l_list[row][6][0:16]))
+            wsum3 = str(sum(l_list[row][6][0:32]))
+            walkload = wsum1.rjust(3," ") + ":" + wsum2.rjust(3," ") + ":" + wsum3.rjust(3," ") 
+            print("{0} @ {1}: load: {2} w_load: {3} in:{4} hPa:{5} epoch:{6}".format(l_list[row][1],l_list[row][2],sumload,walkload,l_list[row][3],l_list[row][4],l_list[row][0] ))
+        else: 
+            print ("{0}".format(l_list[row]))
+            
         row += 1
 
 
@@ -344,9 +364,7 @@ def data_for_line_graph(l_times):
 def make_chart(l_list,type_of_chart,scheme,line_graph,output_stem,user_font):
     """ Create charts of a passed in slice of the dataset """
     
-    
     #look for font in cwd
-    
     if user_font != None:
         font_path = Path(user_font)
         if font_path.is_file() == True:
@@ -508,9 +526,10 @@ def main(ini):
     parser.add_argument("-q", "--quiet", dest="quiet",action='store_true', default=False, help="Minimize output to STDOUT/STDERR")
     #adding arguments
     parser.add_argument("-a", "--add-records", type=int, help="Number of records to add from input files", default=0, action='store',dest='num_input')
+    parser.add_argument("-o", "--overwrite-cache", dest="cache_overwrite",action='store_true', default=False, help="Overwrite cache data when importing new data.")
     parser.add_argument("-r", "--retrieve-current", dest="get_data",action='store_true', default=False, help="Get reading from OpenWeatherMap")    
     parser.add_argument("-k", "--api-key", dest="api_key",action='store', help="API key for OpenWeatherMap")
-    parser.add_argument("-o", "--overwrite-cache", dest="cache_overwrite",action='store_true', default=False, help="Overwrite cache data when importing new data.")
+    parser.add_argument("-n", "--no-cache", dest="no_cache",action='store_true', default=False, help="Do not write retrieved information to cache.")
     # choosing arguments
     parser.add_argument('-B', '--bout-here', action='store', dest='bout_here',help="Where to output/input weather location from.")    
     parser.add_argument("-b", "--begin-date", dest="start_date", action='store', default=None,help="Provide the start date for chart or calculation data.")
@@ -524,7 +543,6 @@ def main(ini):
     # output arguments
     parser.add_argument('-F', '--font', action='store',dest='font', default=None,help="Path to TTF/OTF font if desired")
     parser.add_argument('-f', '--file', action='store',dest='fn_stem', default="out",help="Stem for output filename, defaults to out_[abs|signed].png")
-    parser.add_argument("-w", "--walk_about", dest="walkabout",action='store_true', default=False, help="Modify walking chart by distance from present")
     parser.add_argument("-l", "--load", dest="load",action='store_true', default=False, help="Show <<load>> calculations in selected output")
 
     # type of output arguments
@@ -577,7 +595,8 @@ def main(ini):
             epochstring = str(round(ts))
             addrow = [ epochstring,datestring,timestring,now_imperial,now_metric ]
             l_list.append(addrow)
-            write_cache(weather_location,l_list)
+            if args.no_cache == False:
+                write_cache(weather_location,l_list)
     
     type_of_chart = ""
     if args.load is True:
@@ -631,19 +650,20 @@ def main(ini):
         if the_silence == False:
             print("From: {0} @ {1} until {2} @ {3}".format(l_list[0][1],l_list[0][2],l_list[-1][1],l_list[-1][2]))
 
-        if type_of_chart.find("show") != -1: 
-            display_data(l_list)
         if type_of_chart.find("abs") != -1: 
             make_chart(l_list,"abs",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("sign") != -1: 
             make_chart(l_list,"sign",args.scheme,args.linegraph,args.fn_stem,args.font)
         if type_of_chart.find("walk") != -1: 
             make_chart(l_list,"walk",args.scheme,args.linegraph,args.fn_stem,args.font)
+        if type_of_chart.find("show") != -1: 
+            display_data(l_list)
+            exit()
         if show_load == True:
             sum1 = str(sum(l_list[-1][5][0:8]))
             sum2 = str(sum(l_list[-1][5][0:16]))
             sum3 = str(sum(l_list[-1][5][0:32]))
-            timestring = str(l_list[-1][1]) + " @ " + str(l_list[-1][2]) + ": " + sum1.rjust(3," ") + " " + sum2.rjust(3," ") + " " + sum3.rjust(3," ") 
+            timestring = str(l_list[-1][1]) + " @ " + str(l_list[-1][2]) + ": " + sum1.rjust(3," ") + ":" + sum2.rjust(3," ") + ":" + sum3.rjust(3," ") 
             print("{0}".format(timestring))
             
     else:

@@ -344,3 +344,47 @@ for row in rows:
 * Check intervals for (roughly) equivalent time passage when displaying - done, write into README
 * Check intervals for (roughly) equivalent time passage ON CALCULATIONS (there is no checking now)  
 * Create *only* a line graph.  
+usage: barometers.py [-h] [-q] [-a NUM_INPUT] [-o] [-r] [-k API_KEY] [-n]
+                     [-B BOUT_HERE] [-b START_DATE] [-e END_DATE]
+                     [-d NUM_OUTPUT] [-s SCHEME] [-v] [-t TOLERANCE]
+                     [-i INTERVAL] [-F FONT] [-f FN_STEM] [-l] [-D] [-L] [-S]
+                     [-A] [-W]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -q, --quiet           Minimize output to STDOUT/STDERR
+  -a NUM_INPUT, --add-records NUM_INPUT
+                        Number of records to add from input files
+  -o, --overwrite-cache
+                        Overwrite cache data when importing new data.
+  -r, --retrieve-current
+                        Get reading from OpenWeatherMap
+  -k API_KEY, --api-key API_KEY
+                        API key for OpenWeatherMap
+  -n, --no-cache        Do not write retrieved information to cache.
+  -B BOUT_HERE, --bout-here BOUT_HERE
+                        Where to output/input weather location from.
+  -b START_DATE, --begin-date START_DATE
+                        Provide the start date for chart or calculation data.
+  -e END_DATE, --end-date END_DATE
+                        Provide the end date for chart or calculation data;
+                        optional, only makes sense with --begin-date.
+  -d NUM_OUTPUT, --display-records NUM_OUTPUT
+                        number of records back to display
+  -s SCHEME, --scheme SCHEME
+                        Color scheme - default, wide, alt, original
+  -v, --verify          Verify interval ranges
+  -t TOLERANCE, --tolerance TOLERANCE
+                        Acceptable range in seconds, only makes sense with -v
+  -i INTERVAL, --interval INTERVAL
+                        Expected interval in seconds, only makes sense with -v
+  -F FONT, --font FONT  Path to TTF/OTF font if desired
+  -f FN_STEM, --file FN_STEM
+                        Stem for output filename, defaults to
+                        out_[abs|signed].png
+  -l, --load            Show <<load>> calculations in selected output
+  -D, --show-data       Show data of range on stdout
+  -L, --line-graph      Produce line graph overlay
+  -S, --signed-values   Produce signed value chart
+  -A, --abs-values      Produce abs value chart
+  -W, --walking         Produce walking value chart
