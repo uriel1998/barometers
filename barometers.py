@@ -5,9 +5,10 @@ import linecache
 import configparser
 import requests
 import time
+import datetime
 import pickle, sys, string, argparse, datetime
 from PIL import Image, ImageDraw, ImageFont
-from datetime import date, datetime, timedelta
+
 
 # global variables
 appname = "barometers"
@@ -508,6 +509,7 @@ def main(ini):
     #adding arguments
     parser.add_argument("-a", "--add-records", type=int, help="Number of records to add from input files", default=0, action='store',dest='num_input')
     parser.add_argument("-r", "--retrieve-current", dest="get_data",action='store_true', default=False, help="Get reading from OpenWeatherMap")    
+    parser.add_argument("-k", "--api-key", dest="api_key",action='store', help="API key for OpenWeatherMap")
     parser.add_argument("-o", "--overwrite-cache", dest="cache_overwrite",action='store_true', default=False, help="Overwrite cache data when importing new data.")
     # choosing arguments
     parser.add_argument('-B', '--bout-here', action='store', dest='bout_here',help="Where to output/input weather location from.")    
@@ -533,6 +535,8 @@ def main(ini):
     parser.add_argument("-W", "--walking", dest="walking",action='store_true', default=False, help="Produce walking value chart")
     args = parser.parse_args()
 
+    if args.api_key != None:
+        api_key = args.api_key
     if args.quiet is True:
         the_silence = True
     if args.cache_overwrite is True:
@@ -555,7 +559,6 @@ def main(ini):
                 print("Reading in {0}".format(rawfile))
             read_in_file(rawfile,args.num_input)
     
-    #TODO - test retrieval
     if args.get_data == True: 
         if weather_location is None:
             print ("Location not set in ini or commandline")
@@ -568,10 +571,11 @@ def main(ini):
             weather_data = requests.get(final_url).json()
             now_metric = weather_data['main']['pressure']
             now_imperial=round(now_metric/33.863886666667,2)
-            ts = round(datetime.datetime.timestamp(datetime.datetime.utcnow()))
-            datestring = ts.strftime("%Y-%m-%d")
-            timestring = ts.strftime("%H:%M")
-            addrow = [ str(ts),datestring,timestring,now_imperial,now_metric ]
+            ts = time.time()
+            datestring = datetime.date.today().strftime("%Y-%m-%d")
+            timestring = datetime.datetime.now().strftime("%H:%M")
+            epochstring = str(round(ts))
+            addrow = [ epochstring,datestring,timestring,now_imperial,now_metric ]
             l_list.append(addrow)
             write_cache(weather_location,l_list)
     
